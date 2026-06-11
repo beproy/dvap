@@ -1,5 +1,5 @@
 """
-DVAP 2.0 — MITRE ATT&CK seed script.
+DVAP: MITRE ATT&CK seed script.
 
 Downloads enterprise-attack.json from MITRE GitHub (skip if cached),
 parses STIX attack-pattern objects, and MERGEs Technique nodes into Neo4j.

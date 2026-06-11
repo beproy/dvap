@@ -1,5 +1,5 @@
 """
-DVAP 2.0 — FastAPI entry point.
+DVAP: FastAPI entry point.
 Phase 4: LangGraph orchestrator compiled at startup after Neo4j is ready.
 """
 from contextlib import asynccontextmanager
@@ -27,7 +27,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="DVAP 2.0 API",
+    title="Dynamic Vulnerability & Attack Path Platform (DVAP) API",
     description="Dynamic Vulnerability & Attack Path Platform",
     version="0.1.0-phase4",
     lifespan=lifespan,
@@ -53,7 +53,7 @@ app.include_router(health_router, prefix="/api")
 
 @app.get("/", tags=["root"])
 async def root():
-    return {"message": "DVAP 2.0 backend is running", "phase": 4}
+    return {"message": "DVAP backend is running", "phase": 4}
 
 
 @app.get("/health", tags=["root"])
