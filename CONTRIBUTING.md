@@ -1,4 +1,4 @@
-# Contributing to DVAP 2.0
+# Contributing to DVAP
 
 Thanks for taking an interest in the project. Contributions of all kinds are welcome: bug fixes, new features, documentation improvements, and test coverage.
 

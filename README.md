@@ -1,4 +1,4 @@
-# DVAP 2.0
+# Dynamic Vulnerability & Attack Path Platform (DVAP)
 
 AI Security Copilot for Architects. Multi-agent threat modeling with grounded ATT&CK mapping and CIS controls.
 
@@ -12,7 +12,7 @@ AI Security Copilot for Architects. Multi-agent threat modeling with grounded AT
 
 Traditional threat modeling is slow, manual, and inconsistent. Practitioners draw data flow diagrams, walk STRIDE categories by hand, and produce reports that grow stale the moment the architecture changes. The process typically takes days for a moderately complex system, and output quality depends heavily on individual reviewer expertise.
 
-DVAP 2.0 automates the analyst's workflow. You describe your system (components, types, and data flows), submit it to the API, and five specialist AI agents produce: a STRIDE threat catalog, MITRE ATT&CK technique mappings, attack paths through the graph, and prioritized CIS/NIST control recommendations. STRIDE and MAESTRO run in parallel; the remaining three agents run sequentially, each consuming the previous output. A complete analysis typically takes 2 to 3 minutes.
+DVAP automates the analyst's workflow. You describe your system (components, types, and data flows), submit it to the API, and five specialist AI agents produce: a STRIDE threat catalog, MITRE ATT&CK technique mappings, attack paths through the graph, and prioritized CIS/NIST control recommendations. STRIDE and MAESTRO run in parallel; the remaining three agents run sequentially, each consuming the previous output. A complete analysis typically takes 2 to 3 minutes.
 
 What makes the output trustworthy: every ATT&CK technique ID in the mappings and attack paths is validated against a locally seeded Neo4j graph of 697 real techniques. Agents cannot produce technique IDs that do not exist in the database. All agent outputs are stored in SQLite with full timing data for auditability. The LLM backend (Google Gemini 2.5 Flash) is abstracted behind an interface, so alternative backends can be added without touching the agent layer.
 

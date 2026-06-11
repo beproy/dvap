@@ -2,7 +2,7 @@
 
 ## Scope of Sensitive Data
 
-DVAP 2.0 produces security analysis output (threat models, ATT&CK mappings, attack paths). It does not collect or transmit sensitive data about the systems you analyze unless you include that data in the system description you submit. The only external network call made at runtime is to the Google Gemini API using your own API key.
+DVAP produces security analysis output (threat models, ATT&CK mappings, attack paths). It does not collect or transmit sensitive data about the systems you analyze unless you include that data in the system description you submit. The only external network call made at runtime is to the Google Gemini API using your own API key.
 
 ## Reporting a Vulnerability
 

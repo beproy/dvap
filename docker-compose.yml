@@ -1,4 +1,4 @@
-# DVAP 2.0 — Docker Compose definition
+# DVAP: Docker Compose definition
 # Runs three services: frontend (Next.js), backend (FastAPI), and Neo4j.
 # All services share a private Docker network so they can talk to each other by name.
 

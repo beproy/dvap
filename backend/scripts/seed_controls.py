@@ -1,5 +1,5 @@
 """
-DVAP 2.0 — CIS Controls v8 seed script.
+DVAP: CIS Controls v8 seed script.
 
 Reads backend/data/controls/cis_v8.json and MERGEs a Control node in Neo4j
 for each entry.  Safe to re-run — uses MERGE throughout.
