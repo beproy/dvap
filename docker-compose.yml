@@ -1,0 +1,103 @@
+# DVAP 2.0 — Docker Compose definition
+# Runs three services: frontend (Next.js), backend (FastAPI), and Neo4j.
+# All services share a private Docker network so they can talk to each other by name.
+
+services:
+
+  # ─────────────────────────────────────────────────────────
+  # Neo4j Community Edition — graph database for attack paths
+  # ─────────────────────────────────────────────────────────
+  neo4j:
+    image: neo4j:5.20-community
+    container_name: dvap-neo4j
+    ports:
+      - "7474:7474"   # Neo4j Browser web UI
+      - "7687:7687"   # Bolt protocol (used by the backend)
+    environment:
+      # Default credentials. We'll change these properly in Phase 3.
+      NEO4J_AUTH: neo4j/dvap-dev-password
+      # Memory limits — important so Neo4j doesn't try to grab all your RAM
+      NEO4J_server_memory_heap_initial__size: 512m
+      NEO4J_server_memory_heap_max__size: 1G
+      NEO4J_server_memory_pagecache_size: 512m
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - dvap-net
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────────────────
+  # FastAPI Backend — orchestrator, agents, Gemini calls
+  # ─────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dvap-backend
+    ports:
+      - "8000:8000"
+    environment:
+      # The backend talks to Neo4j using the container name as hostname
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: dvap-dev-password
+      # Gemini API key — read from your .env file (NOT committed to git)
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      LLM_BACKEND: gemini
+      # SQLite file lives on a volume so it survives restarts
+      SQLITE_PATH: /data/dvap.db
+    volumes:
+      - backend_data:/data
+      # Mount source code so changes reload automatically during development
+      - ./backend:/app
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    networks:
+      - dvap-net
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────────────────
+  # Next.js Frontend — React Flow UI, calls backend over HTTP
+  # ─────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: dvap-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      # The frontend (running in your browser) talks to the backend on localhost.
+      # NOT on the docker internal network, because the browser is on your laptop, not in Docker.
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - dvap-net
+    restart: unless-stopped
+
+# ─────────────────────────────────────────────────────────
+# Named volumes — Docker manages these for us
+# ─────────────────────────────────────────────────────────
+volumes:
+  neo4j_data:
+  neo4j_logs:
+  backend_data:
+
+# ─────────────────────────────────────────────────────────
+# Private network shared by all services
+# ─────────────────────────────────────────────────────────
+networks:
+  dvap-net:
+    driver: bridge

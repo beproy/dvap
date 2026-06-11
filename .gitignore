@@ -1,0 +1,75 @@
+# ============================================================
+# DVAP 2.0 Project .gitignore
+# ============================================================
+
+# SECRETS (critical, never push)
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+credentials.json
+secrets.json
+
+# Project documentation (kept private)
+docs/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+.coverage.*
+*.egg-info/
+.venv/
+venv/
+ENV/
+
+# Node.js and Next.js
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+.npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Generated or downloaded data
+# (Note: cis_v8.json IS source-controlled, only ATT&CK download is ignored)
+backend/data/attack/*.json
+backend/data/attack/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+backend/data/dvap.db
+
+# Docker and volume mounts (Docker manages these)
+neo4j_data/
+neo4j_logs/
+backend_data/
+
+# IDE and OS junk
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Misc
+*.tmp
+*.bak

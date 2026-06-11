@@ -1,0 +1,146 @@
+[
+  {
+    "id": "cis-v8-1.1",
+    "control_id": "1.1",
+    "name": "Establish and Maintain Detailed Enterprise Asset Inventory",
+    "description": "Maintain an up-to-date inventory of all enterprise assets with the potential to store or process data, including end-user devices, network devices, IoT devices, and servers. The inventory should capture hardware address, IP address, asset owner, department, and approval status for network connectivity. Review and update the inventory bi-annually or whenever assets are acquired or decommissioned.",
+    "framework": "CIS v8",
+    "category": "asset_management"
+  },
+  {
+    "id": "cis-v8-2.1",
+    "control_id": "2.1",
+    "name": "Establish and Maintain a Software Inventory",
+    "description": "Maintain an accurate inventory of all licensed software installed on enterprise assets, capturing the title, publisher, initial install date, and business purpose for each entry. Use software-level identification properties such as vendor name, product name, and version. Review and update the inventory bi-annually or when new software is installed.",
+    "framework": "CIS v8",
+    "category": "asset_management"
+  },
+  {
+    "id": "cis-v8-3.1",
+    "control_id": "3.1",
+    "name": "Establish and Maintain a Data Management Process",
+    "description": "Establish and maintain a data management process that defines data sensitivity classifications, data owners, handling requirements, retention limits, and disposal procedures. Ensure all enterprise data is categorized according to organizational policy and that handling requirements are communicated to relevant personnel. Review and update documentation annually or when significant changes to data processing occur.",
+    "framework": "CIS v8",
+    "category": "data_protection"
+  },
+  {
+    "id": "cis-v8-3.11",
+    "control_id": "3.11",
+    "name": "Encrypt Sensitive Data at Rest",
+    "description": "Encrypt sensitive data at rest on servers, applications, and end-user devices using an approved algorithm such as AES-256. Apply encryption at the appropriate layer — whole-disk, database, or file-level — based on the sensitivity classification of the data. Verify that encryption keys are managed separately from the data they protect.",
+    "framework": "CIS v8",
+    "category": "data_protection"
+  },
+  {
+    "id": "cis-v8-4.1",
+    "control_id": "4.1",
+    "name": "Establish and Maintain a Secure Configuration Process",
+    "description": "Establish and maintain a documented, repeatable process for applying secure configurations to all enterprise assets and software, based on industry-accepted hardening frameworks such as CIS Benchmarks, NIST guidelines, or vendor security baselines. Include review of both new assets before deployment and existing assets on a defined schedule. Update configuration standards annually or when significant vulnerabilities or product changes occur.",
+    "framework": "CIS v8",
+    "category": "secure_configuration"
+  },
+  {
+    "id": "cis-v8-4.7",
+    "control_id": "4.7",
+    "name": "Manage Default Accounts on Enterprise Assets and Software",
+    "description": "Identify and manage all default accounts provided by vendors on enterprise assets and software, including built-in accounts such as root, administrator, and service accounts. Disable or rename default accounts where technically feasible, and change all default credentials before deployment or immediately after installation. Audit default account status as part of the standard configuration review cycle.",
+    "framework": "CIS v8",
+    "category": "secure_configuration"
+  },
+  {
+    "id": "cis-v8-6.3",
+    "control_id": "6.3",
+    "name": "Require MFA for Externally-Exposed Applications",
+    "description": "Require all externally-exposed enterprise and third-party applications to enforce multi-factor authentication (MFA) for user access, where technically supported. Apply MFA consistently across web applications, remote desktop solutions, VPN endpoints, and cloud services accessible from outside the enterprise perimeter. Prefer phishing-resistant MFA methods such as hardware security keys or passkeys.",
+    "framework": "CIS v8",
+    "category": "access_control"
+  },
+  {
+    "id": "cis-v8-6.5",
+    "control_id": "6.5",
+    "name": "Require MFA for Administrative Access",
+    "description": "Require multi-factor authentication for all administrative access accounts on enterprise assets, including servers, network devices, security tools, and cloud management consoles. Enforce MFA even when access originates from within the enterprise network, as compromised internal devices are a common attack vector. Use dedicated administrative accounts that are separate from standard user accounts.",
+    "framework": "CIS v8",
+    "category": "access_control"
+  },
+  {
+    "id": "cis-v8-7.1",
+    "control_id": "7.1",
+    "name": "Establish and Maintain a Vulnerability Management Process",
+    "description": "Establish and maintain a documented vulnerability management process that covers discovery, prioritization, remediation, and verification of vulnerabilities across all enterprise assets. Integrate vulnerability scanning, patch management, and configuration management into a unified risk-based workflow with defined SLAs by severity. Review and update the process annually or after significant changes to the enterprise environment.",
+    "framework": "CIS v8",
+    "category": "vulnerability_management"
+  },
+  {
+    "id": "cis-v8-7.3",
+    "control_id": "7.3",
+    "name": "Perform Automated Operating System Patch Management",
+    "description": "Deploy and maintain automated patch management tooling to apply operating system updates across all enterprise assets on a monthly or more frequent schedule. Use a centralized patch management solution to enforce compliance, validate successful patch application, and track exceptions. Prioritize critical and high-severity patches and reduce the remediation window to match the vulnerability management SLA.",
+    "framework": "CIS v8",
+    "category": "vulnerability_management"
+  },
+  {
+    "id": "cis-v8-8.1",
+    "control_id": "8.1",
+    "name": "Establish and Maintain an Audit Log Management Process",
+    "description": "Establish and maintain a documented audit log management process that defines what events must be logged, where logs are collected, retention durations, and procedures for reviewing and responding to log-based alerts. Ensure the process covers all assets that store, transmit, or process sensitive data. Review and update the process annually or when significant operational changes occur.",
+    "framework": "CIS v8",
+    "category": "audit_logging"
+  },
+  {
+    "id": "cis-v8-8.2",
+    "control_id": "8.2",
+    "name": "Collect Audit Logs",
+    "description": "Collect audit logs from all enterprise assets — including servers, applications, network devices, cloud services, and end-user devices — where technically feasible. Ensure timestamps are synchronized using a reliable time protocol (e.g., NTP) so logs from different sources can be correlated accurately. Retain logs for a minimum of 90 days and ensure integrity controls prevent unauthorized modification.",
+    "framework": "CIS v8",
+    "category": "audit_logging"
+  },
+  {
+    "id": "cis-v8-10.1",
+    "control_id": "10.1",
+    "name": "Deploy and Maintain Anti-Malware Software",
+    "description": "Deploy and maintain anti-malware software on all enterprise assets — including desktops, laptops, mobile devices, and servers — where technically feasible. Use solutions from reputable vendors that provide real-time detection, behavioral analysis, and automated remediation capabilities. Ensure that anti-malware software is kept active, cannot be disabled by standard users, and that all detection events are logged centrally.",
+    "framework": "CIS v8",
+    "category": "malware_defense"
+  },
+  {
+    "id": "cis-v8-10.2",
+    "control_id": "10.2",
+    "name": "Configure Automatic Anti-Malware Signature Updates",
+    "description": "Configure anti-malware solutions on all enterprise assets to automatically update their signature and heuristic databases at least daily, and more frequently when threat intelligence indicates active campaigns. Log all update failures and trigger alerts so that assets with stale signatures can be identified and remediated promptly. Where internet access is restricted, use an internal mirror or push mechanism to distribute signature updates.",
+    "framework": "CIS v8",
+    "category": "malware_defense"
+  },
+  {
+    "id": "cis-v8-12.2",
+    "control_id": "12.2",
+    "name": "Establish and Maintain a Secure Network Architecture",
+    "description": "Establish and maintain a secure network architecture that includes documented network diagrams, defined security zones, and enforced segmentation between zones based on asset sensitivity and trust level. Implement controls to limit lateral movement, such as host-based firewalls, network access control, and micro-segmentation. Review and update the architecture annually or when significant network changes occur.",
+    "framework": "CIS v8",
+    "category": "network_security"
+  },
+  {
+    "id": "cis-v8-13.1",
+    "control_id": "13.1",
+    "name": "Centralize Security Event Alerting",
+    "description": "Centralize the collection and correlation of security events from all enterprise assets — including network devices, endpoint security tools, identity providers, and application logs — using a SIEM or equivalent solution. Define alerting rules and thresholds that enable timely detection of anomalous activity, policy violations, and known attack patterns. Ensure that all alerts are triaged, escalated where appropriate, and linked to documented response procedures.",
+    "framework": "CIS v8",
+    "category": "network_security"
+  },
+  {
+    "id": "cis-v8-17.1",
+    "control_id": "17.1",
+    "name": "Designate Personnel to Manage Incident Handling",
+    "description": "Designate at least one primary and one backup individual responsible for managing the enterprise incident handling process, and ensure their contact information is documented and kept current. Provide these personnel with appropriate training in incident response, forensic analysis, and communication procedures. Review and update designation and contact details annually.",
+    "framework": "CIS v8",
+    "category": "incident_response"
+  },
+  {
+    "id": "cis-v8-17.4",
+    "control_id": "17.4",
+    "name": "Establish and Maintain an Incident Response Process",
+    "description": "Establish and maintain a formal incident response process covering the full lifecycle: preparation, detection and analysis, containment, eradication, recovery, and post-incident review. Define escalation criteria, communication templates, evidence-preservation procedures, and recovery time objectives for each incident severity level. Conduct a tabletop exercise or live drill at least annually to validate process effectiveness.",
+    "framework": "CIS v8",
+    "category": "incident_response"
+  }
+]
