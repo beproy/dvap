@@ -1,60 +1,48 @@
 # Dynamic Vulnerability & Attack Path Platform (DVAP)
 
-AI Security Copilot for Architects. Multi-agent threat modeling with grounded ATT&CK mapping and CIS controls.
+![Hero screenshot - Architecture view with threat overlay](./docs-img/hero-architecture.png)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Built with: FastAPI + LangGraph](https://img.shields.io/badge/Built%20with-FastAPI%20%2B%20LangGraph-009688.svg)](https://fastapi.tiangolo.com)
-[![Status](https://img.shields.io/badge/Status-Phase%204%20of%206%3A%20backend%20complete%2C%20frontend%20in%20progress-orange.svg)](#project-status)
+[![Built with](https://img.shields.io/badge/Built%20with-FastAPI%20%2B%20LangGraph%20%2B%20Next.js-009688.svg)](ARCHITECTURE.md)
+[![Status](https://img.shields.io/badge/Status-v1.0.0-brightgreen.svg)](#project-status)
+
+> AI Security Copilot for Architects. Multi-agent threat modeling
+> with grounded ATT&CK mapping and CIS controls.
 
 ---
 
-## What is DVAP?
+## What DVAP does
 
-Traditional threat modeling is slow, manual, and inconsistent. Practitioners draw data flow diagrams, walk STRIDE categories by hand, and produce reports that grow stale the moment the architecture changes. The process typically takes days for a moderately complex system, and output quality depends heavily on individual reviewer expertise.
+Traditional threat modeling is slow, manual, and inconsistent. Practitioners draw data flow
+diagrams by hand, walk STRIDE categories one by one, and produce reports that grow stale
+the moment the architecture changes. A moderately complex system can take days to review,
+and output quality depends heavily on the individual reviewer's expertise and familiarity
+with MITRE ATT&CK.
 
-DVAP automates the analyst's workflow. You describe your system (components, types, and data flows), submit it to the API, and five specialist AI agents produce: a STRIDE threat catalog, MITRE ATT&CK technique mappings, attack paths through the graph, and prioritized CIS/NIST control recommendations. STRIDE and MAESTRO run in parallel; the remaining three agents run sequentially, each consuming the previous output. A complete analysis typically takes 2 to 3 minutes.
+DVAP automates that workflow. You describe your system once (components, types, and data
+flows), click Run Analysis, and five specialist AI agents produce a complete threat model:
+a STRIDE threat catalog, MITRE ATT&CK technique mappings, attack chains through the
+component graph, and prioritized CIS control recommendations. STRIDE and MAESTRO run in
+parallel; the remaining three agents run sequentially, each consuming the output of the
+previous one. A complete run typically completes in two to three minutes.
 
-What makes the output trustworthy: every ATT&CK technique ID in the mappings and attack paths is validated against a locally seeded Neo4j graph of 697 real techniques. Agents cannot produce technique IDs that do not exist in the database. All agent outputs are stored in SQLite with full timing data for auditability. The LLM backend (Google Gemini 2.5 Flash) is abstracted behind an interface, so alternative backends can be added without touching the agent layer.
+What makes the output trustworthy: every ATT&CK technique ID in the mappings is validated
+against a locally seeded Neo4j graph of 697 real techniques. Agents cannot hallucinate
+technique IDs that do not exist in the database. All agent outputs are persisted in SQLite
+with full timing data for auditability. The architecture graph is rendered interactively in
+the browser so you can explore components, threats, and attack paths visually.
 
----
-
-## Architecture
-
-```mermaid
-flowchart TD
-    Browser --> FE["Next.js Frontend (port 3000)"]
-    FE -->|REST API| BE["FastAPI Backend (port 8000)"]
-    BE --> ORC[LangGraph Orchestrator]
-    ORC -->|in parallel| STR[STRIDE Agent]
-    ORC -->|in parallel| MAE[MAESTRO Agent]
-    STR & MAE --> ATT["ATT&CK Agent"]
-    ATT --> TREE[Attack Tree Agent]
-    TREE --> CTRL[Controls Agent]
-    STR & MAE & ATT & TREE & CTRL -->|LLM calls| GEM["Google Gemini 2.5 Flash (external)"]
-    STR & ATT & TREE & CTRL -->|read / write| NEO[("Neo4j (port 7687)")]
-    ORC -->|agent outputs| SQ[("SQLite audit trail")]
-```
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Frontend | Next.js 14 + React Flow + TailwindCSS |
-| Backend | FastAPI + LangGraph 0.2 |
-| Graph DB | Neo4j Community Edition 5.20 |
-| Audit trail | SQLite |
-| LLM | Google Gemini 2.5 Flash |
-| Orchestration | Docker Compose |
+DVAP augments experienced security architects; it does not replace them. The tool surfaces
+candidates and maps them to reference data. A human reviewer is still responsible for
+prioritizing findings, validating relevance, and deciding on remediation. The goal is to
+eliminate the manual grunt work so architects can focus on judgment rather than research.
 
 ---
 
 ## Quickstart
 
-**Prerequisites:**
-- Docker Desktop with Compose V2
-- A Google AI Studio API key (free tier works): https://aistudio.google.com/
+**Prerequisites:** Docker Desktop with Compose V2, and a free Google AI Studio API key
+from [aistudio.google.com](https://aistudio.google.com/).
 
 **1. Clone and configure:**
 
@@ -62,7 +50,7 @@ flowchart TD
 git clone git@github.com:beproy/dvap.git
 cd dvap
 cp .env.example .env
-# Open .env and set GOOGLE_API_KEY to your actual key
+# Edit .env and set GOOGLE_API_KEY to your actual key
 ```
 
 **2. Start all containers:**
@@ -71,142 +59,152 @@ cp .env.example .env
 docker compose up -d
 ```
 
-Wait for all three containers (dvap-backend, dvap-neo4j, dvap-frontend) to report healthy:
+**3. Wait for all three containers to report healthy:**
 
 ```bash
 docker compose ps
+# dvap-backend, dvap-neo4j, and dvap-frontend should all show "healthy"
+# Neo4j takes about 30-40 seconds on first start
 ```
 
-**3. Seed the reference data (one-time setup):**
+**4. Seed the reference data (one-time setup, takes 3-5 minutes):**
 
 ```bash
 docker compose exec backend python scripts/seed_attack.py
 docker compose exec backend python scripts/seed_controls.py
 ```
 
-Note: `seed_attack.py` downloads the MITRE ATT&CK STIX bundle from GitHub (approximately 100 MB) and imports 697 techniques into Neo4j. This takes 3 to 5 minutes on first run. The file is cached locally; subsequent runs are fast.
+`seed_attack.py` downloads the MITRE ATT&CK STIX bundle (approximately 100 MB) and imports
+697 techniques into Neo4j. The file is cached locally; subsequent runs are fast.
 
-**Then:**
-- API explorer: http://localhost:8000/docs
-- Frontend: http://localhost:3000 (placeholder while Phase 5 is in progress)
+**5. Install frontend dependencies (required after first start or after `docker compose down -v`):**
+
+```bash
+docker compose exec frontend npm install
+docker compose restart frontend
+```
+
+**6. Optional: load a demo system with a pre-run analysis:**
+
+```bash
+docker compose exec backend python scripts/seed_demo.py
+```
+
+This creates the "Acme Customer Portal" example system and runs a full analysis on it, so
+you immediately see what DVAP produces instead of starting from an empty state.
+
+**7. Open the app:**
+
+[http://localhost:3000](http://localhost:3000)
+
+The API explorer is available at [http://localhost:8000/docs](http://localhost:8000/docs).
+
+> **Reset note:** if you run `docker compose down -v`, the `-v` flag deletes all Docker
+> volumes including the one holding `node_modules`. Re-run steps 4 and 5 after any
+> full volume reset.
 
 ---
 
-## Example Usage
+## Screenshots
 
-The full analysis workflow involves two API calls: registering a system, then starting an analysis run.
+### Architecture view with threats
 
-### Step 1: Register a system
+![Architecture view showing components and threat nodes](./docs-img/hero-architecture.png)
 
-```bash
-curl -s -X POST http://localhost:8000/api/systems \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Customer Portal",
-    "description": "Public-facing customer support portal with auth and ticketing.",
-    "components": [
-      {"name": "Web Frontend",  "type": "web_app",  "description": "React SPA served via CDN"},
-      {"name": "API Gateway",   "type": "gateway",  "description": "Routes and authenticates incoming requests"},
-      {"name": "Auth Service",  "type": "service",  "description": "JWT issuance and validation"},
-      {"name": "Customer DB",   "type": "database", "description": "PostgreSQL holding customer records and tickets"}
-    ],
-    "data_flows": [
-      {"source": "Web Frontend", "destination": "API Gateway",  "data_type": "JSON over HTTPS",        "protocol": "HTTPS",   "is_encrypted": true},
-      {"source": "API Gateway",  "destination": "Auth Service", "data_type": "JWT validation requests", "protocol": "gRPC",    "is_encrypted": true},
-      {"source": "API Gateway",  "destination": "Customer DB",  "data_type": "SQL queries",             "protocol": "TCP/TLS", "is_encrypted": true}
-    ]
-  }'
-```
+The React Flow canvas shows system components (nodes with type icons) and the threats
+generated by the analysis (smaller nodes fanning outward). Edges show data flows with
+protocol labels.
 
-Response (201 Created):
+### Threat findings
 
-```json
-{
-  "system_id": "sys_8f3a2b1c",
-  "name": "Customer Portal",
-  "component_count": 4,
-  "flow_count": 3,
-  "created_at": "2026-06-11T09:00:00Z"
-}
-```
+![Findings page showing threats, ATT&CK mappings, attack paths, and controls](./docs-img/findings.png)
 
-### Step 2: Start an analysis run
+The findings page groups output into four sections: threat catalog (STRIDE and MAESTRO),
+ATT&CK technique mappings (grounded in Neo4j), attack path chains, and CIS control
+recommendations.
 
-```bash
-curl -s -X POST http://localhost:8000/api/systems/sys_8f3a2b1c/analyze \
-  -H "Content-Type: application/json" \
-  -d '{"agents": ["stride", "maestro", "attack", "attack_tree", "controls"]}'
-```
+### Attack path visualization
 
-Response (202 Accepted):
+![Attack path detail showing technique chain](./docs-img/attack-path.png)
 
-```json
-{
-  "run_id": "run_9d4e1f2a",
-  "system_id": "sys_8f3a2b1c",
-  "status": "pending",
-  "started_at": "2026-06-11T09:00:05Z",
-  "estimated_seconds": 120
-}
-```
+Each attack path shows the sequence of ATT&CK techniques an attacker would chain together
+to reach a target component, with tactic labels at each step.
 
-### Step 3: Poll for completion, then fetch findings
+### Creating a system
 
-```bash
-# Check status (typically completes in 2 to 3 minutes)
-curl -s http://localhost:8000/api/analyses/run_9d4e1f2a
+![System creation form with component and data flow fields](./docs-img/system-creation.png)
 
-# Fetch full findings once status is "completed"
-curl -s http://localhost:8000/api/analyses/run_9d4e1f2a/findings
-```
-
-Findings response shape:
-
-```json
-{
-  "run_id": "run_9d4e1f2a",
-  "status": "completed",
-  "threats": ["..."],
-  "technique_mappings": ["..."],
-  "attack_paths": ["..."],
-  "control_recommendations": ["..."],
-  "timings": {"stride": 25.0, "attack": 34.6, "attack_tree": 23.0, "controls": 33.3},
-  "errors": []
-}
-```
-
-A real run on the Customer Portal example produces approximately 11 threats, 6 ATT&CK technique mappings, 4 attack paths, and 8 control recommendations.
+The system creation form accepts a name, description, one or more components (with type and
+description), and data flows between components. Validation runs inline before submission.
 
 ---
 
-## Project Status
+## Tech Stack
 
-**Backend: complete (Phase 4 of 6).** All five agents are implemented, tested, and running in Docker. The REST API is stable. Phase 4 acceptance tests all pass, including two concurrent analysis runs completing without errors.
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js 14, React Flow, TailwindCSS, shadcn/ui |
+| Backend | FastAPI, LangGraph 0.2, Python 3.12 |
+| Graph DB | Neo4j Community Edition 5.20 |
+| Audit DB | SQLite |
+| LLM | Google Gemini 2.5 Flash |
+| Orchestration | Docker Compose |
 
-**Frontend: in progress (Phase 5).** The Next.js scaffold is in place but the React Flow graph visualization, system registration form, and findings display are not yet built.
+---
 
-**Known limitations:**
+## How it works
 
-- ATT&CK mapping coverage is partial (roughly 50 to 75 percent of threats receive technique mappings, depending on the system). Threats with no reasonable match are reported in the `unmapped_threats` field.
-- Free-tier Gemini rate limits apply. A global semaphore caps concurrent LLM calls at two to avoid 429 errors under load.
-- The CIS Controls v8 dataset is a hand-curated subset of 18 controls. Broader coverage is a future milestone.
+You submit a system description to the API. The LangGraph orchestrator fans out to the
+STRIDE and MAESTRO agents in parallel, waits for both to finish, then runs the ATT&CK
+agent (which validates technique IDs against Neo4j), followed by the Attack Tree agent
+(which builds attack chains in the graph), and finally the Controls agent (which maps
+findings to CIS remediation guidance). Results are persisted to both Neo4j (for graph
+queries and visualization) and SQLite (for the audit trail). The frontend polls for
+completion and renders the full findings set when the run status reaches "completed."
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for details on the component architecture, agent
+pipeline, data layer, and how to extend the system.
+
+---
+
+## Project status
+
+**v1.0.0 - feature complete. Looking for feedback and contributors.**
+
+Known limitations:
+
+- ATT&CK mapping coverage is partial. Roughly 50-75% of threats receive technique
+  mappings depending on the system; threats with no reasonable match are reported in the
+  `unmapped_threats` field.
+- Free-tier Gemini rate limits apply. A concurrency semaphore caps parallel LLM calls
+  at 2 to reduce 429 errors, but analysis may slow or fail under heavy load on the free
+  tier.
+- The CIS Controls v8 dataset is a hand-curated subset of 18 controls. Broader coverage
+  is a future milestone.
 
 ---
 
 ## Roadmap
 
-- **Phase 5:** React Flow visualization, system registration form, findings display
-- **Phase 6:** GitHub Actions CI (lint, type-check, backend tests on push)
-- **Future (optional):** Local Ollama backend for fully air-gapped operation
+- Local Ollama backend for fully air-gapped operation
+- Additional LLM providers (OpenAI, Anthropic)
+- Expanded CIS Controls dataset
+- Optional cloud deployment guide
 
 ---
 
 ## Contributing
 
-Contributions are welcome. To get started, follow the Quickstart above to set up a local development environment, then read [CONTRIBUTING.md](CONTRIBUTING.md) for code style, testing requirements, and pull request expectations.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
 ## License
 
-MIT, see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).
+
+---
+
+## Acknowledgments
+
+Built with significant assistance from AI coding tools, including Anthropic's Claude.
