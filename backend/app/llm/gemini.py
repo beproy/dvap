@@ -1,7 +1,7 @@
 import asyncio
 import json
 import logging
-from typing import Type, TypeVar
+from typing import Any, Type, TypeVar
 
 import google.generativeai as genai
 from pydantic import BaseModel, ValidationError
@@ -19,6 +19,22 @@ _RETRY_SYSTEM_PROMPT = (
     "You are a JSON correction assistant. Return only valid JSON matching the provided schema."
 )
 
+_RATE_LIMIT_MSG = (
+    "Gemini API rate limit reached. Free tier allows limited requests per minute. "
+    "Wait 60 seconds and try again, or upgrade to a paid Gemini tier at "
+    "https://aistudio.google.com/."
+)
+
+
+class RateLimitError(Exception):
+    """Raised when the Gemini API returns a rate-limit or quota error."""
+
+
+def _raise_if_rate_limited(exc: Exception) -> None:
+    """Re-raise exc as RateLimitError if the message indicates a rate or quota error."""
+    if "rate" in str(exc).lower() or "quota" in str(exc).lower():
+        raise RateLimitError(_RATE_LIMIT_MSG) from exc
+
 
 class GeminiProvider(LLMProvider):
     def __init__(self, model: str = "gemini-2.5-flash"):
@@ -31,6 +47,18 @@ class GeminiProvider(LLMProvider):
     @property
     def model_name(self) -> str:
         return self._model_name
+
+    async def _generate(self, prompt: str, generation_config: dict) -> Any:
+        """Call generate_content_async, re-raising rate-limit errors with a clear message."""
+        try:
+            async with _gemini_semaphore:
+                return await self._client.generate_content_async(
+                    prompt,
+                    generation_config=generation_config,
+                )
+        except Exception as exc:
+            _raise_if_rate_limited(exc)
+            raise
 
     async def generate_structured(
         self,
@@ -48,11 +76,7 @@ class GeminiProvider(LLMProvider):
             "response_schema": schema,
         }
 
-        async with _gemini_semaphore:
-            response = await self._client.generate_content_async(
-                full_prompt,
-                generation_config=generation_config,
-            )
+        response = await self._generate(full_prompt, generation_config)
 
         # First attempt at validation
         try:
@@ -90,10 +114,6 @@ class GeminiProvider(LLMProvider):
         )
         retry_full_prompt = f"{_RETRY_SYSTEM_PROMPT}\n\n{retry_user_prompt}"
 
-        async with _gemini_semaphore:
-            retry_response = await self._client.generate_content_async(
-                retry_full_prompt,
-                generation_config=generation_config,
-            )
+        retry_response = await self._generate(retry_full_prompt, generation_config)
 
         return schema.model_validate_json(retry_response.text)
