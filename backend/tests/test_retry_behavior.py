@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from pydantic import BaseModel, ValidationError
 
-from app.llm.gemini import GeminiProvider
+from app.llm.gemini import GeminiProvider, RateLimitError
 
 
 class _Output(BaseModel):
@@ -77,6 +77,48 @@ async def test_retry_fails_cleanly_on_second_failure():
         )
 
     assert mock_model.generate_content_async.call_count == 2
+
+
+@pytest.mark.parametrize("error_text", [
+    "429 Too Many Requests: rate limit exceeded",
+    "Resource exhausted: quota exceeded for this project",
+    "RATE_LIMIT_EXCEEDED",
+])
+async def test_rate_limit_raises_rate_limit_error(error_text: str):
+    """generate_structured raises RateLimitError when the API signals rate/quota exhaustion."""
+    mock_model = MagicMock()
+    mock_model.generate_content_async = AsyncMock(
+        side_effect=Exception(error_text)
+    )
+
+    provider = _build_provider(mock_model)
+    with pytest.raises(RateLimitError) as exc_info:
+        await provider.generate_structured(
+            system_prompt="sys",
+            user_prompt="user",
+            schema=_Output,
+            max_tokens=512,
+        )
+
+    assert "Gemini API rate limit reached" in str(exc_info.value)
+    assert mock_model.generate_content_async.call_count == 1
+
+
+async def test_non_rate_limit_error_propagates_as_is():
+    """A generic API error is not converted to RateLimitError."""
+    mock_model = MagicMock()
+    mock_model.generate_content_async = AsyncMock(
+        side_effect=RuntimeError("internal server error")
+    )
+
+    provider = _build_provider(mock_model)
+    with pytest.raises(RuntimeError):
+        await provider.generate_structured(
+            system_prompt="sys",
+            user_prompt="user",
+            schema=_Output,
+            max_tokens=512,
+        )
 
 
 async def test_no_retry_when_first_call_succeeds():

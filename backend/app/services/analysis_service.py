@@ -63,6 +63,15 @@ def _sqlite_list_runs() -> list[dict]:
         return [dict(r) for r in rows]
 
 
+def _sqlite_list_runs_by_system(system_id: str) -> list[dict]:
+    with db_conn() as conn:
+        rows = conn.execute(
+            "SELECT * FROM analysis_runs WHERE system_id = ? ORDER BY started_at DESC LIMIT 100",
+            (system_id,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
 def _sqlite_get_agent_outputs(run_id: str) -> list[dict]:
     with db_conn() as conn:
         rows = conn.execute(
@@ -154,14 +163,18 @@ async def get_run(run_id: str) -> AnalysisRunOut | None:
     )
 
 
-async def list_runs() -> list[AnalysisRunSummary]:
-    rows = await asyncio.to_thread(_sqlite_list_runs)
+async def list_runs(system_id: str | None = None) -> list[AnalysisRunSummary]:
+    if system_id:
+        rows = await asyncio.to_thread(_sqlite_list_runs_by_system, system_id)
+    else:
+        rows = await asyncio.to_thread(_sqlite_list_runs)
     return [
         AnalysisRunSummary(
             run_id=r["run_id"],
             system_id=r["system_id"],
             system_name=r["system_name"],
             status=r["status"],
+            llm_model=r["llm_model"],
             started_at=r["started_at"],
             completed_at=r.get("completed_at"),
         )
