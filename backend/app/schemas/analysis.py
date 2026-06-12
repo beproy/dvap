@@ -99,6 +99,7 @@ class AnalysisRunSummary(BaseModel):
     system_id: str
     system_name: str
     status: AnalysisStatus
+    llm_model: str
     started_at: str
     completed_at: str | None = None
 
@@ -109,6 +110,7 @@ class AnalysisRunSummary(BaseModel):
                 "system_id": "sys_8f3a2b1c",
                 "system_name": "Customer Portal",
                 "status": "completed",
+                "llm_model": "gemini-2.5-flash",
                 "started_at": "2026-06-10T14:25:03Z",
                 "completed_at": "2026-06-10T14:25:20Z",
             }

@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException, status
+from typing import Optional
+
+from fastapi import APIRouter, HTTPException, Query, status
 
 from app.schemas.analysis import (
     AnalysisFindings,
@@ -32,8 +34,10 @@ async def start_analysis(system_id: str, body: AnalysisRequest) -> AnalysisStart
     response_model=list[AnalysisRunSummary],
     summary="List recent analysis runs (most recent first, up to 100)",
 )
-async def list_runs() -> list[AnalysisRunSummary]:
-    return await analysis_service.list_runs()
+async def list_runs(
+    system_id: Optional[str] = Query(None, description="Filter runs by system ID"),
+) -> list[AnalysisRunSummary]:
+    return await analysis_service.list_runs(system_id)
 
 
 @router.get(
