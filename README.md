@@ -237,7 +237,3 @@ MIT. See [LICENSE](LICENSE).
 
 ---
 
-## Acknowledgments
-
-Built with significant assistance from AI coding tools, including Anthropic's Claude.
-
