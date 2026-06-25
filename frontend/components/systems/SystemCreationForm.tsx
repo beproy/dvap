@@ -5,15 +5,15 @@ import { useRouter } from "next/navigation"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Plus, AlertCircle, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Separator } from "@/components/ui/separator"
 import { createSystem } from "@/lib/api"
 import { systemSchema, type SystemFormValues } from "@/lib/systemFormSchema"
 import ComponentFieldset from "./ComponentFieldset"
 import DataFlowFieldset from "./DataFlowFieldset"
+
+const INPUT_CLS =
+  "bg-surface-base border-border-subtle text-text-primary placeholder:text-text-disabled"
 
 const DEFAULT_VALUES: SystemFormValues = {
   name: "",
@@ -63,22 +63,16 @@ export default function SystemCreationForm() {
         setSubmitError("Failed to create system")
         return
       }
-      // apiFetch throws "API NNN: <body>" - try to extract FastAPI's detail field
       const jsonMatch = err.message.match(/^API \d+: (.+)$/)
       if (jsonMatch) {
         try {
           const body = JSON.parse(jsonMatch[1])
-          if (typeof body.detail === "string") {
-            setSubmitError(body.detail)
-            return
-          }
+          if (typeof body.detail === "string") { setSubmitError(body.detail); return }
           if (Array.isArray(body.detail) && body.detail.length > 0) {
             setSubmitError(body.detail[0].msg ?? err.message)
             return
           }
-        } catch {
-          // body is not JSON - fall through to raw message
-        }
+        } catch { /* body is not JSON */ }
       }
       setSubmitError(err.message)
     }
@@ -88,68 +82,96 @@ export default function SystemCreationForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 max-w-2xl">
       {/* System details */}
       <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-slate-100">System Details</h2>
+        <h2
+          className="text-text-primary font-medium"
+          style={{ fontSize: "var(--text-lg)" }}
+        >
+          System Details
+        </h2>
 
         <div className="space-y-1">
-          <Label htmlFor="name" className="text-sm text-slate-300">
+          <label
+            htmlFor="name"
+            className="text-text-secondary uppercase font-medium"
+            style={{ fontSize: "var(--text-xs)", letterSpacing: "var(--tracking-wide)" }}
+          >
             Name
-          </Label>
+          </label>
           <Input
             {...register("name")}
             id="name"
             placeholder="e.g. Customer Portal"
-            className="bg-slate-900 border-slate-700"
+            className={INPUT_CLS}
           />
           {errors.name && (
-            <p className="text-sm text-red-400">{errors.name.message}</p>
+            <p style={{ fontSize: "var(--text-xs)", color: "var(--severity-critical)" }}>
+              {errors.name.message}
+            </p>
           )}
         </div>
 
         <div className="space-y-1">
-          <Label htmlFor="description" className="text-sm text-slate-300">
+          <label
+            htmlFor="description"
+            className="text-text-secondary uppercase font-medium"
+            style={{ fontSize: "var(--text-xs)", letterSpacing: "var(--tracking-wide)" }}
+          >
             Description
-          </Label>
+          </label>
           <Textarea
             {...register("description")}
             id="description"
             placeholder="Describe the system and its purpose (10-500 characters)"
             rows={3}
-            className="bg-slate-900 border-slate-700 resize-none"
+            className={`${INPUT_CLS} resize-none`}
           />
           {errors.description && (
-            <p className="text-sm text-red-400">{errors.description.message}</p>
+            <p style={{ fontSize: "var(--text-xs)", color: "var(--severity-critical)" }}>
+              {errors.description.message}
+            </p>
           )}
         </div>
       </section>
 
-      <Separator className="bg-slate-800" />
+      <div style={{ borderBottom: "0.5px solid var(--border-subtle)" }} />
 
       {/* Components */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-slate-100">Components</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Minimum 2 required</p>
+            <h2
+              className="text-text-primary font-medium"
+              style={{ fontSize: "var(--text-lg)" }}
+            >
+              Components
+            </h2>
+            <p
+              className="text-text-tertiary mt-0.5"
+              style={{ fontSize: "var(--text-xs)" }}
+            >
+              Minimum 2 required
+            </p>
           </div>
-          <Button
+          <button
             type="button"
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              appendComponent({ name: "", type: "service", description: "" })
-            }
-            className="border-slate-700 text-slate-300 hover:bg-slate-800"
+            onClick={() => appendComponent({ name: "", type: "service", description: "" })}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border-subtle text-text-secondary hover:border-border-default hover:text-text-primary transition-colors"
+            style={{ fontSize: "var(--text-sm)" }}
           >
-            <Plus className="h-4 w-4 mr-1" />
+            <Plus className="h-3.5 w-3.5" />
             Add component
-          </Button>
+          </button>
         </div>
 
         {errors.components?.root && (
-          <p className="text-sm text-red-400">{errors.components.root.message}</p>
+          <p style={{ fontSize: "var(--text-xs)", color: "var(--severity-critical)" }}>
+            {errors.components.root.message}
+          </p>
         )}
         {typeof errors.components?.message === "string" && (
-          <p className="text-sm text-red-400">{errors.components.message}</p>
+          <p style={{ fontSize: "var(--text-xs)", color: "var(--severity-critical)" }}>
+            {errors.components.message}
+          </p>
         )}
 
         <div className="space-y-3">
@@ -167,40 +189,47 @@ export default function SystemCreationForm() {
         </div>
       </section>
 
-      <Separator className="bg-slate-800" />
+      <div style={{ borderBottom: "0.5px solid var(--border-subtle)" }} />
 
       {/* Data flows */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-slate-100">Data Flows</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Minimum 1 required</p>
+            <h2
+              className="text-text-primary font-medium"
+              style={{ fontSize: "var(--text-lg)" }}
+            >
+              Data Flows
+            </h2>
+            <p
+              className="text-text-tertiary mt-0.5"
+              style={{ fontSize: "var(--text-xs)" }}
+            >
+              Minimum 1 required
+            </p>
           </div>
-          <Button
+          <button
             type="button"
-            variant="outline"
-            size="sm"
             onClick={() =>
-              appendFlow({
-                source: "",
-                destination: "",
-                data_type: "",
-                protocol: "",
-                is_encrypted: false,
-              })
+              appendFlow({ source: "", destination: "", data_type: "", protocol: "", is_encrypted: false })
             }
-            className="border-slate-700 text-slate-300 hover:bg-slate-800"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border-subtle text-text-secondary hover:border-border-default hover:text-text-primary transition-colors"
+            style={{ fontSize: "var(--text-sm)" }}
           >
-            <Plus className="h-4 w-4 mr-1" />
+            <Plus className="h-3.5 w-3.5" />
             Add flow
-          </Button>
+          </button>
         </div>
 
         {errors.data_flows?.root && (
-          <p className="text-sm text-red-400">{errors.data_flows.root.message}</p>
+          <p style={{ fontSize: "var(--text-xs)", color: "var(--severity-critical)" }}>
+            {errors.data_flows.root.message}
+          </p>
         )}
         {typeof errors.data_flows?.message === "string" && (
-          <p className="text-sm text-red-400">{errors.data_flows.message}</p>
+          <p style={{ fontSize: "var(--text-xs)", color: "var(--severity-critical)" }}>
+            {errors.data_flows.message}
+          </p>
         )}
 
         <div className="space-y-3">
@@ -218,28 +247,50 @@ export default function SystemCreationForm() {
         </div>
       </section>
 
-      {/* Submit */}
+      {/* Submit error */}
       {submitError && (
-        <div className="flex items-start gap-2 rounded-lg border border-red-800 bg-red-950/30 p-3 text-sm text-red-400">
-          <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
-          <span>{submitError}</span>
+        <div
+          className="flex items-start gap-2 rounded-lg bg-surface-raised p-3"
+          style={{
+            borderTop:    "0.5px solid var(--border-subtle)",
+            borderRight:  "0.5px solid var(--border-subtle)",
+            borderBottom: "0.5px solid var(--border-subtle)",
+            borderLeft:   "2px solid var(--severity-critical)",
+          }}
+        >
+          <AlertCircle
+            className="h-4 w-4 mt-0.5 shrink-0"
+            style={{ color: "var(--severity-critical)" }}
+          />
+          <span
+            className="text-text-secondary"
+            style={{ fontSize: "var(--text-sm)" }}
+          >
+            {submitError}
+          </span>
         </div>
       )}
 
+      {/* Actions */}
       <div className="flex gap-3">
-        <Button type="submit" disabled={isSubmitting} className="gap-2">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-accent hover:bg-accent-bright text-surface-base font-medium transition-colors disabled:opacity-50"
+          style={{ fontSize: "var(--text-sm)" }}
+        >
           {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
           {isSubmitting ? "Creating..." : "Create System"}
-        </Button>
-        <Button
+        </button>
+        <button
           type="button"
-          variant="outline"
           onClick={() => router.back()}
           disabled={isSubmitting}
-          className="border-slate-700 text-slate-300 hover:bg-slate-800"
+          className="px-4 py-2 rounded-lg border border-border-subtle text-text-secondary hover:border-border-default hover:text-text-primary transition-colors disabled:opacity-50"
+          style={{ fontSize: "var(--text-sm)" }}
         >
           Cancel
-        </Button>
+        </button>
       </div>
     </form>
   )

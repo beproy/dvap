@@ -2,24 +2,30 @@ import Link from "next/link"
 
 export default function Header() {
   return (
-    <header className="border-b border-slate-800 bg-slate-950">
+    <header className="bg-surface-base border-b border-border-subtle">
       <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link
           href="/"
-          className="text-slate-100 font-semibold text-sm hover:text-white transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          className="flex items-center gap-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
-          Dynamic Vulnerability &amp; Attack Path Platform (DVAP)
+          <span
+            className="rounded-full bg-accent shrink-0"
+            style={{ width: 6, height: 6 }}
+            aria-hidden="true"
+          />
+          <span className="text-text-primary font-medium text-sm">DVAP</span>
         </Link>
+
         <nav className="flex items-center gap-6">
           <Link
             href="/systems/new"
-            className="text-sm text-slate-400 hover:text-slate-100 transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            className="text-text-secondary hover:text-text-primary transition-colors text-sm rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             New System
           </Link>
           <Link
             href="/about"
-            className="text-sm text-slate-400 hover:text-slate-100 transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            className="text-text-secondary hover:text-text-primary transition-colors text-sm rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             About
           </Link>

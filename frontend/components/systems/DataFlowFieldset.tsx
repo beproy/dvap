@@ -2,9 +2,7 @@
 
 import { Control, Controller, UseFormRegister, FieldErrors, useWatch } from "react-hook-form"
 import { X } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -13,6 +11,14 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { SystemFormValues } from "@/lib/systemFormSchema"
+
+const FIELD_CLS =
+  "bg-surface-base border-border-subtle text-text-primary placeholder:text-text-disabled"
+
+const LABEL_STYLE = {
+  fontSize: "var(--text-xs)",
+  letterSpacing: "var(--tracking-wide)",
+}
 
 interface Props {
   index: number
@@ -40,26 +46,37 @@ export default function DataFlowFieldset({
   const destinationOptions = componentNames.filter((n) => n !== currentSource)
 
   return (
-    <div className="rounded-lg border border-slate-700 p-4 space-y-3">
+    <div
+      className="rounded-lg bg-surface-raised p-4 space-y-3"
+      style={{ border: "0.5px solid var(--border-subtle)" }}
+    >
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-slate-300">Flow {index + 1}</span>
+        <span
+          className="text-text-secondary font-medium"
+          style={{ fontSize: "var(--text-sm)" }}
+        >
+          Flow {index + 1}
+        </span>
         {canRemove && (
-          <Button
+          <button
             type="button"
-            variant="ghost"
-            size="sm"
             onClick={onRemove}
-            className="h-7 w-7 p-0 text-slate-500 hover:text-red-400"
+            className="text-text-tertiary hover:text-severity-critical transition-colors p-1 rounded"
             aria-label="Remove data flow"
           >
             <X className="h-4 w-4" />
-          </Button>
+          </button>
         )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-1">
-          <Label className="text-xs text-slate-400">Source</Label>
+          <label
+            className="text-text-secondary uppercase font-medium"
+            style={LABEL_STYLE}
+          >
+            Source
+          </label>
           <Controller
             name={`data_flows.${index}.source`}
             control={control}
@@ -69,7 +86,9 @@ export default function DataFlowFieldset({
                 onValueChange={field.onChange}
                 disabled={componentNames.length === 0}
               >
-                <SelectTrigger className="bg-slate-900 border-slate-700">
+                <SelectTrigger
+                  className={`${FIELD_CLS} focus:ring-0 focus:ring-offset-0`}
+                >
                   <SelectValue placeholder="Select source" />
                 </SelectTrigger>
                 <SelectContent>
@@ -83,12 +102,19 @@ export default function DataFlowFieldset({
             )}
           />
           {flowErrors?.source && (
-            <p className="text-xs text-red-400">{flowErrors.source.message}</p>
+            <p style={{ fontSize: "var(--text-xs)", color: "var(--severity-critical)" }}>
+              {flowErrors.source.message}
+            </p>
           )}
         </div>
 
         <div className="space-y-1">
-          <Label className="text-xs text-slate-400">Destination</Label>
+          <label
+            className="text-text-secondary uppercase font-medium"
+            style={LABEL_STYLE}
+          >
+            Destination
+          </label>
           <Controller
             name={`data_flows.${index}.destination`}
             control={control}
@@ -98,7 +124,9 @@ export default function DataFlowFieldset({
                 onValueChange={field.onChange}
                 disabled={destinationOptions.length === 0}
               >
-                <SelectTrigger className="bg-slate-900 border-slate-700">
+                <SelectTrigger
+                  className={`${FIELD_CLS} focus:ring-0 focus:ring-offset-0`}
+                >
                   <SelectValue placeholder="Select destination" />
                 </SelectTrigger>
                 <SelectContent>
@@ -112,45 +140,53 @@ export default function DataFlowFieldset({
             )}
           />
           {flowErrors?.destination && (
-            <p className="text-xs text-red-400">{flowErrors.destination.message}</p>
+            <p style={{ fontSize: "var(--text-xs)", color: "var(--severity-critical)" }}>
+              {flowErrors.destination.message}
+            </p>
           )}
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-1">
-          <Label
+          <label
             htmlFor={`data_flows.${index}.data_type`}
-            className="text-xs text-slate-400"
+            className="text-text-secondary uppercase font-medium"
+            style={LABEL_STYLE}
           >
             Data Type
-          </Label>
+          </label>
           <Input
             {...register(`data_flows.${index}.data_type`)}
             id={`data_flows.${index}.data_type`}
             placeholder="e.g. JSON over HTTPS"
-            className="bg-slate-900 border-slate-700"
+            className={FIELD_CLS}
           />
           {flowErrors?.data_type && (
-            <p className="text-xs text-red-400">{flowErrors.data_type.message}</p>
+            <p style={{ fontSize: "var(--text-xs)", color: "var(--severity-critical)" }}>
+              {flowErrors.data_type.message}
+            </p>
           )}
         </div>
 
         <div className="space-y-1">
-          <Label
+          <label
             htmlFor={`data_flows.${index}.protocol`}
-            className="text-xs text-slate-400"
+            className="text-text-secondary uppercase font-medium"
+            style={LABEL_STYLE}
           >
             Protocol
-          </Label>
+          </label>
           <Input
             {...register(`data_flows.${index}.protocol`)}
             id={`data_flows.${index}.protocol`}
             placeholder="e.g. HTTPS"
-            className="bg-slate-900 border-slate-700"
+            className={FIELD_CLS}
           />
           {flowErrors?.protocol && (
-            <p className="text-xs text-red-400">{flowErrors.protocol.message}</p>
+            <p style={{ fontSize: "var(--text-xs)", color: "var(--severity-critical)" }}>
+              {flowErrors.protocol.message}
+            </p>
           )}
         </div>
       </div>
@@ -160,14 +196,16 @@ export default function DataFlowFieldset({
           type="checkbox"
           {...register(`data_flows.${index}.is_encrypted`)}
           id={`data_flows.${index}.is_encrypted`}
-          className="h-4 w-4 rounded border-slate-600 bg-slate-900 accent-blue-500"
+          className="h-4 w-4 rounded border-border-subtle bg-surface-base cursor-pointer"
+          style={{ accentColor: "var(--accent)" }}
         />
-        <Label
+        <label
           htmlFor={`data_flows.${index}.is_encrypted`}
-          className="text-xs text-slate-400 cursor-pointer"
+          className="text-text-secondary cursor-pointer"
+          style={{ fontSize: "var(--text-xs)" }}
         >
           Encrypted in transit
-        </Label>
+        </label>
       </div>
     </div>
   )

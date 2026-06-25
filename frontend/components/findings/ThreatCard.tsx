@@ -1,19 +1,15 @@
 "use client"
 
-import { useState } from "react"
-import { ChevronDown } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
 import type { Threat } from "@/lib/types"
 
-const LEVEL_CLASSES: Record<string, string> = {
-  Low: "bg-yellow-900/40 text-yellow-300 border-yellow-800",
-  Medium: "bg-orange-900/40 text-orange-300 border-orange-800",
-  High: "bg-red-900/40 text-red-300 border-red-800",
+const IMPACT_COLORS: Record<string, string> = {
+  High:   "var(--severity-critical)",
+  Medium: "var(--severity-high)",
+  Low:    "var(--severity-low)",
 }
 
 const AGENT_LABEL: Record<string, string> = {
-  stride: "STRIDE",
+  stride:  "STRIDE",
   maestro: "MAESTRO",
 }
 
@@ -22,85 +18,132 @@ interface Props {
 }
 
 export default function ThreatCard({ threat }: Props) {
-  const [expanded, setExpanded] = useState(false)
-  const hasExtra = !!(threat.attack_vector || threat.abuse_case)
+  const impact = threat.impact ?? "Medium"
+  const severityColor = IMPACT_COLORS[impact] ?? IMPACT_COLORS["Medium"]
 
   return (
-    <div className="rounded-lg border border-slate-800 bg-slate-900/50 overflow-hidden">
-      <button
-        type="button"
-        onClick={() => setExpanded((v) => !v)}
-        className="w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-slate-800/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
-        aria-expanded={expanded}
-      >
-        <div className="flex-1 min-w-0 space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-medium text-slate-100 text-sm">
-              {threat.title}
-            </span>
-            {threat.source_agent && (
-              <Badge className="bg-slate-700 text-slate-300 border-slate-600 text-xs">
-                {AGENT_LABEL[threat.source_agent] ?? threat.source_agent}
-              </Badge>
-            )}
-          </div>
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            <Badge className="bg-slate-700 text-slate-400 border-slate-600">
-              {threat.category}
-            </Badge>
-            <span
-              className={cn(
-                "inline-flex items-center rounded-full border px-2 py-0.5 font-medium",
-                LEVEL_CLASSES[threat.likelihood] ?? LEVEL_CLASSES["Medium"]
-              )}
-            >
-              L: {threat.likelihood}
-            </span>
-            <span
-              className={cn(
-                "inline-flex items-center rounded-full border px-2 py-0.5 font-medium",
-                LEVEL_CLASSES[threat.impact] ?? LEVEL_CLASSES["Medium"]
-              )}
-            >
-              I: {threat.impact}
-            </span>
-            <span className="text-slate-500">{threat.component_name}</span>
-          </div>
+    <div
+      className="rounded-lg bg-surface-raised"
+      style={{
+        borderTop:    "0.5px solid var(--border-subtle)",
+        borderRight:  "0.5px solid var(--border-subtle)",
+        borderBottom: "0.5px solid var(--border-subtle)",
+        borderLeft:   `2px solid ${severityColor}`,
+      }}
+    >
+      <div className="px-4 py-3 space-y-2.5">
+        {/* Title row */}
+        <div className="flex items-start justify-between gap-3">
+          <h4
+            className="text-text-primary font-medium leading-snug"
+            style={{ fontSize: "var(--text-md)" }}
+          >
+            {threat.title}
+          </h4>
+          <span
+            className="uppercase font-medium shrink-0"
+            style={{
+              fontSize: "var(--text-xs)",
+              letterSpacing: "var(--tracking-wide)",
+              color: severityColor,
+            }}
+          >
+            {impact}
+          </span>
         </div>
-        <ChevronDown
-          className={cn(
-            "h-4 w-4 text-slate-500 shrink-0 mt-0.5 transition-transform",
-            expanded && "rotate-180"
-          )}
-        />
-      </button>
 
-      {expanded && (
-        <div className="px-4 pb-4 space-y-3 border-t border-slate-800 pt-3">
-          <p className="text-sm text-slate-300 leading-relaxed">
-            {threat.description}
-          </p>
-          {threat.attack_vector && (
-            <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">
-                Attack Vector
-              </p>
-              <p className="text-sm text-slate-400">{threat.attack_vector}</p>
-            </div>
-          )}
-          {threat.abuse_case && (
-            <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">
-                Abuse Case
-              </p>
-              <p className="text-sm text-slate-400">{threat.abuse_case}</p>
-            </div>
-          )}
-          {!hasExtra && (
-            <p className="text-xs text-slate-600 italic">No additional details.</p>
+        {/* Description */}
+        <p
+          className="text-text-secondary"
+          style={{ fontSize: "var(--text-sm)", lineHeight: 1.6 }}
+        >
+          {threat.description}
+        </p>
+
+        {/* Attack vector (STRIDE) */}
+        {threat.attack_vector && (
+          <div>
+            <p
+              className="text-text-tertiary uppercase font-medium mb-0.5"
+              style={{
+                fontSize: "var(--text-xs)",
+                letterSpacing: "var(--tracking-wide)",
+              }}
+            >
+              Attack Vector
+            </p>
+            <p
+              className="text-text-secondary"
+              style={{ fontSize: "var(--text-sm)" }}
+            >
+              {threat.attack_vector}
+            </p>
+          </div>
+        )}
+
+        {/* Abuse case (MAESTRO) */}
+        {threat.abuse_case && (
+          <div>
+            <p
+              className="text-text-tertiary uppercase font-medium mb-0.5"
+              style={{
+                fontSize: "var(--text-xs)",
+                letterSpacing: "var(--tracking-wide)",
+              }}
+            >
+              Abuse Case
+            </p>
+            <p
+              className="text-text-secondary"
+              style={{ fontSize: "var(--text-sm)" }}
+            >
+              {threat.abuse_case}
+            </p>
+          </div>
+        )}
+
+        {/* Tags row */}
+        <div className="flex flex-wrap gap-1.5 pt-0.5">
+          <span
+            className="px-2 py-0.5 rounded text-text-tertiary"
+            style={{
+              border: "0.5px solid var(--border-subtle)",
+              fontSize: "var(--text-xs)",
+            }}
+          >
+            {threat.category}
+          </span>
+          <span
+            className="px-2 py-0.5 rounded text-text-tertiary"
+            style={{
+              border: "0.5px solid var(--border-subtle)",
+              fontSize: "var(--text-xs)",
+            }}
+          >
+            {threat.component_name}
+          </span>
+          <span
+            className="px-2 py-0.5 rounded text-text-tertiary"
+            style={{
+              border: "0.5px solid var(--border-subtle)",
+              fontSize: "var(--text-xs)",
+            }}
+          >
+            L: {threat.likelihood}
+          </span>
+          {threat.source_agent && (
+            <span
+              className="px-2 py-0.5 rounded text-text-tertiary"
+              style={{
+                border: "0.5px solid var(--border-subtle)",
+                fontSize: "var(--text-xs)",
+              }}
+            >
+              {AGENT_LABEL[threat.source_agent] ?? threat.source_agent}
+            </span>
           )}
         </div>
-      )}
+      </div>
     </div>
   )
 }

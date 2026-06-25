@@ -261,17 +261,21 @@ const EditorCanvasInner = forwardRef<CanvasHandle>(
           edgeTypes={edgeTypes}
           minZoom={0.2}
           maxZoom={2}
-          className="bg-slate-950"
+          className="bg-surface-base"
         >
-          <Background variant={BackgroundVariant.Dots} gap={16} size={1} color="#334155" />
+          <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#1a2330" />
           <Controls
             style={{ bottom: 16, right: 16, left: "auto", top: "auto" }}
             showInteractive={false}
           />
           <MiniMap
-            style={{ top: 16, right: 16, bottom: "auto", left: "auto" }}
-            nodeColor={() => "#3b82f6"}
-            maskColor="rgba(2, 6, 23, 0.8)"
+            style={{
+              top: 16, right: 16, bottom: "auto", left: "auto",
+              backgroundColor: "#0e1620",
+              border: "0.5px solid #1a2330",
+            }}
+            nodeColor={() => "#131c28"}
+            maskColor="rgba(11, 17, 23, 0.85)"
           />
         </ReactFlow>
 

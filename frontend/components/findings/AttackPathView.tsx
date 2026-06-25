@@ -1,30 +1,76 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useEffect, useState } from "react"
 import { ArrowRight, Play, Pause, RotateCcw, Maximize2 } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import type { AttackPath } from "@/lib/types"
+import type { AttackPath, AttackPathStep } from "@/lib/types"
 import { useStoryModePlayer } from "@/hooks/useStoryModePlayer"
 import type { StorySpeed } from "@/hooks/useStoryModePlayer"
 import PresentationMode from "./PresentationMode"
 
-function mitreUrl(id: string): string {
-  if (id.includes(".")) {
-    const dotIndex = id.indexOf(".")
-    return `https://attack.mitre.org/techniques/${id.slice(0, dotIndex)}/${id.slice(dotIndex + 1)}/`
-  }
-  return `https://attack.mitre.org/techniques/${id}/`
+const SEVERITY_COLORS: Record<string, string> = {
+  Low:      "var(--severity-low)",
+  Medium:   "var(--severity-medium)",
+  High:     "var(--severity-high)",
+  Critical: "var(--severity-critical)",
 }
 
-const SEVERITY_CLASSES: Record<string, string> = {
-  Low: "bg-yellow-900/40 text-yellow-300 border-yellow-800",
-  Medium: "bg-orange-900/40 text-orange-300 border-orange-800",
-  High: "bg-red-900/40 text-red-300 border-red-800",
-  Critical: "bg-red-950/80 text-red-200 border-red-500",
+interface StepCardProps {
+  step: AttackPathStep
+  index: number
+  currentStep: number
+  isRevealed: boolean
+  hasStarted: boolean
 }
 
-const STEP_TRANSITION = "opacity 250ms cubic-bezier(0.4, 0, 0.2, 1)"
+function StepCard({ step, index, currentStep, isRevealed, hasStarted }: StepCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  // Retrigger lift animation each time this card becomes the newly revealed step
+  useEffect(() => {
+    if (!hasStarted || index !== currentStep || !cardRef.current) return
+    const el = cardRef.current
+    el.classList.remove("step-just-revealed")
+    void el.offsetWidth // force reflow so browser re-fires the animation
+    el.classList.add("step-just-revealed")
+  }, [currentStep, hasStarted, index])
+
+  return (
+    <div
+      ref={cardRef}
+      className="rounded-lg bg-surface-raised p-2.5 w-[168px] space-y-1.5"
+      style={{
+        border:     "0.5px solid var(--border-subtle)",
+        opacity:    isRevealed ? 1 : 0.2,
+        transition: `opacity var(--duration-normal) var(--easing-default)`,
+      }}
+    >
+      <span
+        className="inline-flex items-center justify-center rounded bg-surface-elevated text-text-tertiary"
+        style={{
+          fontSize:   "var(--text-xs)",
+          padding:    "1px 5px",
+          minWidth:   22,
+          fontFamily: "var(--font-mono)",
+        }}
+      >
+        {String(step.sequence).padStart(2, "0")}
+      </span>
+      <p
+        className="text-text-primary"
+        style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)" }}
+      >
+        {step.technique_id}
+      </p>
+      <p
+        className="text-text-secondary"
+        style={{ fontSize: "var(--text-sm)", lineHeight: 1.5 }}
+      >
+        {step.description}
+      </p>
+    </div>
+  )
+}
 
 interface Props {
   path: AttackPath
@@ -35,12 +81,11 @@ export default function AttackPathView({ path }: Props) {
   const { currentStep, isPlaying, speed, play, pause, restart, setSpeed } =
     useStoryModePlayer(sorted)
 
-  // Gate that separates "never played" (full opacity everywhere) from
-  // "playback started" (revealed = full, unrevealed = dimmed).
   const [hasStarted, setHasStarted] = useState(false)
   const [isPresenting, setIsPresenting] = useState(false)
 
   const atEnd = sorted.length > 0 && currentStep >= sorted.length - 1
+  const severityColor = SEVERITY_COLORS[path.severity] ?? SEVERITY_COLORS["Medium"]
 
   function handlePlay() {
     setHasStarted(true)
@@ -49,40 +94,54 @@ export default function AttackPathView({ path }: Props) {
 
   function handleRestart() {
     setHasStarted(true)
-    // restart() sets step=0 and pauses; play() then starts from 0.
-    // React 18 batches both; net state: currentStep=0, isPlaying=true.
     restart()
     play()
   }
 
-  // Arrow at position i connects step i-1 to step i; it fades in with step i.
   function revealedAt(i: number): boolean {
     return !hasStarted || i <= currentStep
   }
 
   const showControls = sorted.length > 1
 
+  const ctrlBtn = cn(
+    "flex items-center gap-1 px-2 py-1 rounded border transition-colors",
+    "border-border-subtle text-text-tertiary hover:text-text-primary hover:border-border-default"
+  )
+
   return (
-    <div className="rounded-lg border border-slate-800 bg-slate-900/30 p-4 space-y-3">
+    <div
+      className="rounded-lg bg-surface-raised p-4 space-y-3"
+      style={{ border: "0.5px solid var(--border-subtle)" }}
+    >
       {/* Header row */}
       <div className="flex flex-wrap items-start gap-3">
-        <Badge
-          className={cn(
-            "shrink-0",
-            SEVERITY_CLASSES[path.severity] ?? SEVERITY_CLASSES["Medium"]
-          )}
+        <span
+          className="uppercase font-medium shrink-0 px-2 py-0.5 rounded"
+          style={{
+            fontSize:      "var(--text-xs)",
+            letterSpacing: "var(--tracking-wide)",
+            color:         severityColor,
+            border:        `0.5px solid ${severityColor}`,
+          }}
         >
           {path.severity}
-        </Badge>
+        </span>
+
         <div className="flex-1 min-w-0">
-          <p className="font-medium text-slate-100 text-sm">{path.name}</p>
-          <p className="text-xs text-slate-400 mt-0.5">{path.objective}</p>
+          <p className="text-text-primary font-medium" style={{ fontSize: "var(--text-md)" }}>
+            {path.name}
+          </p>
+          <p className="text-text-secondary mt-0.5" style={{ fontSize: "var(--text-sm)" }}>
+            {path.objective}
+          </p>
         </div>
 
         {sorted.length > 0 && (
           <button
             onClick={() => setIsPresenting(true)}
-            className="flex items-center gap-1 px-2 py-1 text-xs rounded border border-slate-700 text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors shrink-0"
+            className={cn(ctrlBtn, "shrink-0")}
+            style={{ fontSize: "var(--text-xs)" }}
             title="Full-screen presentation"
           >
             <Maximize2 className="w-3 h-3" />
@@ -92,29 +151,32 @@ export default function AttackPathView({ path }: Props) {
 
         {showControls && (
           <div className="flex items-center gap-1.5 shrink-0">
-            {/* Speed selector */}
-            <div className="flex rounded overflow-hidden border border-slate-700">
+            <div
+              className="flex rounded overflow-hidden"
+              style={{ border: "0.5px solid var(--border-subtle)" }}
+            >
               {(["slow", "normal", "fast"] as StorySpeed[]).map((s) => (
                 <button
                   key={s}
                   onClick={() => setSpeed(s)}
                   className={cn(
-                    "px-2 py-0.5 text-xs transition-colors",
+                    "px-2 py-0.5 transition-colors",
                     speed === s
-                      ? "bg-slate-700 text-slate-100"
-                      : "text-slate-500 hover:text-slate-300 hover:bg-slate-800"
+                      ? "bg-surface-elevated text-text-primary"
+                      : "text-text-tertiary hover:text-text-primary"
                   )}
+                  style={{ fontSize: "var(--text-xs)" }}
                 >
                   {s === "slow" ? "0.5x" : s === "normal" ? "1x" : "2x"}
                 </button>
               ))}
             </div>
 
-            {/* Restart -- visible once playback has started and not yet at end */}
             {hasStarted && !atEnd && (
               <button
                 onClick={handleRestart}
-                className="flex items-center gap-1 px-2 py-1 text-xs rounded border border-slate-700 text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+                className={cn(ctrlBtn)}
+                style={{ fontSize: "var(--text-xs)" }}
                 title="Restart from step 1"
               >
                 <RotateCcw className="w-3 h-3" />
@@ -122,35 +184,36 @@ export default function AttackPathView({ path }: Props) {
               </button>
             )}
 
-            {/* Play / Pause / Replay */}
             {!hasStarted ? (
               <button
                 onClick={handlePlay}
-                className="flex items-center gap-1 px-2 py-1 text-xs rounded border border-cyan-800 text-cyan-300 hover:bg-cyan-950/50 transition-colors"
+                className={cn(
+                  "flex items-center gap-1 px-2 py-1 rounded border transition-colors",
+                  "border-border-default text-text-primary hover:bg-surface-elevated"
+                )}
+                style={{ fontSize: "var(--text-xs)" }}
               >
                 <Play className="w-3 h-3" />
                 Play
               </button>
             ) : isPlaying ? (
-              <button
-                onClick={pause}
-                className="flex items-center gap-1 px-2 py-1 text-xs rounded border border-slate-700 text-slate-300 hover:bg-slate-800 transition-colors"
-              >
+              <button onClick={pause} className={cn(ctrlBtn)} style={{ fontSize: "var(--text-xs)" }}>
                 <Pause className="w-3 h-3" />
                 Pause
               </button>
             ) : atEnd ? (
-              <button
-                onClick={handlePlay}
-                className="flex items-center gap-1 px-2 py-1 text-xs rounded border border-slate-700 text-slate-300 hover:bg-slate-800 transition-colors"
-              >
+              <button onClick={handlePlay} className={cn(ctrlBtn)} style={{ fontSize: "var(--text-xs)" }}>
                 <RotateCcw className="w-3 h-3" />
                 Replay
               </button>
             ) : (
               <button
                 onClick={handlePlay}
-                className="flex items-center gap-1 px-2 py-1 text-xs rounded border border-cyan-800 text-cyan-300 hover:bg-cyan-950/50 transition-colors"
+                className={cn(
+                  "flex items-center gap-1 px-2 py-1 rounded border transition-colors",
+                  "border-border-default text-text-primary hover:bg-surface-elevated"
+                )}
+                style={{ fontSize: "var(--text-xs)" }}
               >
                 <Play className="w-3 h-3" />
                 Play
@@ -160,42 +223,29 @@ export default function AttackPathView({ path }: Props) {
         )}
       </div>
 
-      {/* Steps */}
+      {/* Step cards */}
       {sorted.length > 0 && (
-        <div className="flex items-start gap-1 overflow-x-auto pb-1">
+        <div className="flex items-start gap-1.5 overflow-x-auto pb-1">
           {sorted.map((step, i) => (
-            <div key={step.sequence} className="flex items-start gap-1 shrink-0">
+            <div key={step.sequence} className="flex items-start gap-1.5 shrink-0">
               {i > 0 && (
                 <div
+                  className="mt-4"
                   style={{
-                    opacity: revealedAt(i) ? 1 : 0.2,
-                    transition: STEP_TRANSITION,
+                    opacity:    revealedAt(i) ? 1 : 0.2,
+                    transition: `opacity var(--duration-normal) var(--easing-default)`,
                   }}
                 >
-                  <ArrowRight className="h-4 w-4 text-slate-600 shrink-0 mt-3" />
+                  <ArrowRight className="h-3.5 w-3.5 text-text-tertiary" />
                 </div>
               )}
-              <div
-                className="rounded border border-slate-700 bg-slate-900 p-2.5 w-[150px]"
-                style={{
-                  opacity: revealedAt(i) ? 1 : 0.2,
-                  transition: STEP_TRANSITION,
-                }}
-              >
-                <a
-                  href={mitreUrl(step.technique_id)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block"
-                >
-                  <Badge className="bg-blue-900/40 text-blue-300 border-blue-800 hover:bg-blue-800/60 text-xs mb-1.5">
-                    {step.technique_id}
-                  </Badge>
-                </a>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  {step.description}
-                </p>
-              </div>
+              <StepCard
+                step={step}
+                index={i}
+                currentStep={currentStep}
+                isRevealed={revealedAt(i)}
+                hasStarted={hasStarted}
+              />
             </div>
           ))}
         </div>

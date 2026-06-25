@@ -4,7 +4,14 @@ import Link from "next/link"
 import { Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
+
+const FIELD_CLS =
+  "bg-surface-base border-border-subtle text-text-primary placeholder:text-text-disabled"
+
+const LABEL_STYLE = {
+  fontSize: "var(--text-xs)",
+  letterSpacing: "var(--tracking-wider)",
+}
 
 interface EditorBottomBarProps {
   systemName: string
@@ -26,18 +33,28 @@ export default function EditorBottomBar({
   return (
     <div className="flex items-end gap-4 px-4 py-3">
       <div className="flex flex-col gap-1 min-w-0 flex-1 max-w-xs">
-        <label className="text-xs text-slate-400 uppercase tracking-wider">System name</label>
+        <label
+          className="text-text-tertiary uppercase font-medium"
+          style={LABEL_STYLE}
+        >
+          System name
+        </label>
         <Input
           value={systemName}
           onChange={(e) => onNameChange(e.target.value)}
           placeholder="e.g. Customer Portal"
           maxLength={100}
           disabled={isSaving}
-          className="bg-slate-950 border-slate-700 text-slate-100 placeholder:text-slate-600 h-9 text-sm"
+          className={`${FIELD_CLS} h-9 text-sm`}
         />
       </div>
       <div className="flex flex-col gap-1 min-w-0 flex-1">
-        <label className="text-xs text-slate-400 uppercase tracking-wider">Description</label>
+        <label
+          className="text-text-tertiary uppercase font-medium"
+          style={LABEL_STYLE}
+        >
+          Description
+        </label>
         <Textarea
           value={systemDescription}
           onChange={(e) => onDescriptionChange(e.target.value)}
@@ -45,34 +62,33 @@ export default function EditorBottomBar({
           maxLength={500}
           rows={1}
           disabled={isSaving}
-          className="bg-slate-950 border-slate-700 text-slate-100 placeholder:text-slate-600 text-sm min-h-0 resize-none py-2"
+          className={`${FIELD_CLS} text-sm min-h-0 resize-none py-2`}
         />
       </div>
       <div className="flex items-center gap-2 shrink-0 pb-0.5">
-        <Button
-          asChild
-          variant="outline"
-          size="sm"
-          className="border-slate-700 text-slate-300 hover:text-slate-100"
-          disabled={isSaving}
+        <Link
+          href="/"
+          className="px-3 py-1.5 rounded-lg border border-border-subtle text-text-secondary hover:border-border-default hover:text-text-primary transition-colors"
+          style={{ fontSize: "var(--text-sm)" }}
+          aria-disabled={isSaving}
         >
-          <Link href="/">Cancel</Link>
-        </Button>
-        <Button
-          size="sm"
+          Cancel
+        </Link>
+        <button
           onClick={onSave}
           disabled={isSaving}
-          className="bg-slate-700 hover:bg-slate-600 text-slate-100 min-w-[96px]"
+          className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-accent hover:bg-accent-bright text-surface-base font-medium transition-colors disabled:opacity-50 min-w-[96px] justify-center"
+          style={{ fontSize: "var(--text-sm)" }}
         >
           {isSaving ? (
             <>
-              <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
               Saving...
             </>
           ) : (
             "Save System"
           )}
-        </Button>
+        </button>
       </div>
     </div>
   )

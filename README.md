@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Built with](https://img.shields.io/badge/Built%20with-FastAPI%20%2B%20LangGraph%20%2B%20Next.js-009688.svg)](ARCHITECTURE.md)
-[![Status](https://img.shields.io/badge/Status-v1.0.0-brightgreen.svg)](#project-status)
+[![Status](https://img.shields.io/badge/Status-v1.1.0-brightgreen.svg)](#project-status)
 
 > AI Security Copilot for Architects. Multi-agent threat modeling
 > with grounded ATT&CK mapping and CIS controls.
@@ -25,6 +25,13 @@ a STRIDE threat catalog, MITRE ATT&CK technique mappings, attack chains through 
 component graph, and prioritized CIS control recommendations. STRIDE and MAESTRO run in
 parallel; the remaining three agents run sequentially, each consuming the output of the
 previous one. A complete run typically completes in two to three minutes.
+
+v1.1.0 adds two major features. The **visual system editor** at `/systems/new/visual`
+lets you drag component types onto a React Flow canvas, draw data flow connections between
+them, and edit properties in a side panel. The visual and form-based creation paths produce
+identical API requests. **Story Mode** adds inline step-by-step playback to each attack
+path on the Findings page, with adjustable speed and pause controls, plus a full-screen
+presentation mode with keyboard navigation for demo walkthroughs.
 
 What makes the output trustworthy: every ATT&CK technique ID in the mappings is validated
 against a locally seeded Neo4j graph of 697 real techniques. Agents cannot hallucinate
@@ -107,6 +114,21 @@ The API explorer is available at [http://localhost:8000/docs](http://localhost:8
 
 ## Screenshots
 
+### Landing page
+
+![Landing page with Quick form and Visual editor entry points](./docs-img/landing.png)
+
+Two creation paths side by side: Quick form for structured input, Visual editor for
+drag-and-drop diagramming.
+
+### Visual system editor
+
+![Visual editor showing component palette and React Flow canvas](./docs-img/visual-editor.png)
+
+Drag component types from the left palette onto the canvas. Draw connections between nodes
+to define data flows. Click any node or edge to edit its properties in the panel that
+slides in from the right.
+
 ### Architecture view with threats
 
 ![Architecture view showing components and threat nodes](./docs-img/hero-architecture.png)
@@ -121,21 +143,31 @@ protocol labels.
 
 The findings page groups output into four sections: threat catalog (STRIDE and MAESTRO),
 ATT&CK technique mappings (grounded in Neo4j), attack path chains, and CIS control
-recommendations.
+recommendations. Severity is color-coded throughout; ATT&CK technique IDs appear in
+monospaced font with links to the MITRE ATT&CK knowledge base.
+
+### Attack path story mode
+
+![Attack path presentation mode showing step-by-step technique reveal](./docs-img/story-mode.png)
+
+Full-screen presentation mode for stakeholder walkthroughs. Space or arrow keys advance
+through steps; Esc exits. Auto-advances every four seconds if no key is pressed.
 
 ### Attack path visualization
 
 ![Attack path detail showing technique chain](./docs-img/attack-path.png)
 
 Each attack path shows the sequence of ATT&CK techniques an attacker would chain together
-to reach a target component, with tactic labels at each step.
+to reach a target component. The Play button animates the reveal step by step at
+adjustable speed.
 
 ### Creating a system
 
 ![System creation form with component and data flow fields](./docs-img/system-creation.png)
 
-The system creation form accepts a name, description, one or more components (with type and
-description), and data flows between components. Validation runs inline before submission.
+The form-based creation flow accepts a name, description, one or more components (with type
+and description), and data flows between components. Validation runs inline before
+submission.
 
 ---
 
@@ -143,7 +175,7 @@ description), and data flows between components. Validation runs inline before s
 
 | Layer | Technology |
 |---|---|
-| Frontend | Next.js 14, React Flow, TailwindCSS, shadcn/ui |
+| Frontend | Next.js 14, React Flow, TailwindCSS, shadcn/ui, Inter, JetBrains Mono |
 | Backend | FastAPI, LangGraph 0.2, Python 3.12 |
 | Graph DB | Neo4j Community Edition 5.20 |
 | Audit DB | SQLite |
@@ -169,7 +201,7 @@ pipeline, data layer, and how to extend the system.
 
 ## Project status
 
-**v1.0.0 - feature complete. Looking for feedback and contributors.**
+**v1.1.0 - visual editor, story mode, and Direction C design refresh. Looking for feedback and contributors.**
 
 Known limitations:
 

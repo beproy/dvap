@@ -1,17 +1,18 @@
 export default function Footer() {
   return (
-    <footer className="border-t border-slate-800 mt-auto py-4">
-      <div className="max-w-7xl mx-auto px-4 flex items-center justify-between text-xs text-slate-500">
-        <span>DVAP v0.5.0 (Phase 5)</span>
+    <footer className="py-5">
+      <p className="text-center text-text-tertiary" style={{ fontSize: "var(--text-xs)" }}>
+        DVAP v1.1.0{" "}
+        <span aria-hidden="true">&middot;</span>{" "}
         <a
           href="https://github.com/beproy/dvap"
           target="_blank"
           rel="noopener noreferrer"
-          className="hover:text-slate-300 transition-colors"
+          className="hover:text-text-secondary transition-colors"
         >
           github.com/beproy/dvap
         </a>
-      </div>
+      </p>
     </footer>
   )
 }

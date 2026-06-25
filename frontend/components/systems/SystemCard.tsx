@@ -2,9 +2,8 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Trash2, Layers, Clock } from "lucide-react"
+import { Trash2 } from "lucide-react"
 import { mutate } from "swr"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -35,10 +34,8 @@ export default function SystemCard({ system }: Props) {
     setDeleting(true)
     try {
       await deleteSystem(system.system_id)
-      // Refresh the systems list cache
       mutate("/api/systems")
     } catch {
-      // System may already be gone; re-fetch to sync state
       mutate("/api/systems")
     } finally {
       setDeleting(false)
@@ -48,13 +45,18 @@ export default function SystemCard({ system }: Props) {
 
   return (
     <>
-      <Card
+      <div
         onClick={() => router.push(`/systems/${system.system_id}`)}
-        className="cursor-pointer hover:border-slate-600 transition-colors relative group"
+        className="cursor-pointer rounded-lg border border-border-subtle bg-surface-raised hover:border-border-default transition-colors relative group"
+        style={{ transitionDuration: "var(--duration-normal)", transitionTimingFunction: "var(--easing-default)" }}
       >
-        <CardHeader className="pb-2">
+        <div className="p-5 flex flex-col gap-3">
+          {/* Name row with delete button */}
           <div className="flex items-start justify-between gap-2">
-            <h3 className="font-semibold text-slate-100 leading-tight">
+            <h3
+              className="text-text-primary font-medium leading-snug"
+              style={{ fontSize: "var(--text-md)" }}
+            >
               {system.name}
             </h3>
             <button
@@ -62,32 +64,36 @@ export default function SystemCard({ system }: Props) {
                 e.stopPropagation()
                 setConfirmOpen(true)
               }}
-              className="shrink-0 opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-400 transition-all p-1 rounded focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="shrink-0 opacity-0 group-hover:opacity-100 text-text-tertiary hover:text-severity-critical transition-all p-1 rounded focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-border-strong"
+              style={{ transitionDuration: "var(--duration-normal)" }}
               aria-label="Delete system"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>
-        </CardHeader>
-        <CardContent>
+
+          {/* Description */}
           {truncated && (
-            <p className="text-sm text-slate-400 mb-4 leading-relaxed">
+            <p
+              className="text-text-secondary leading-relaxed"
+              style={{ fontSize: "var(--text-sm)" }}
+            >
               {truncated}
             </p>
           )}
-          <div className="flex items-center gap-4 text-xs text-slate-500">
-            <span className="flex items-center gap-1">
-              <Layers className="h-3.5 w-3.5" />
-              {system.component_count}{" "}
-              {system.component_count === 1 ? "component" : "components"}
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock className="h-3.5 w-3.5" />
-              {formatRelativeTime(system.created_at)}
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+
+          {/* Meta row */}
+          <p
+            className="text-text-tertiary"
+            style={{ fontSize: "var(--text-xs)" }}
+          >
+            {system.component_count}{" "}
+            {system.component_count === 1 ? "component" : "components"}
+            {" "}&middot;{" "}
+            created {formatRelativeTime(system.created_at)}
+          </p>
+        </div>
+      </div>
 
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent onClick={(e) => e.stopPropagation()}>
@@ -95,7 +101,7 @@ export default function SystemCard({ system }: Props) {
             <DialogTitle>Delete system?</DialogTitle>
             <DialogDescription>
               This will permanently delete{" "}
-              <span className="font-medium text-slate-200">{system.name}</span>{" "}
+              <span className="font-medium text-text-primary">{system.name}</span>{" "}
               and all of its analysis runs. This cannot be undone.
             </DialogDescription>
           </DialogHeader>

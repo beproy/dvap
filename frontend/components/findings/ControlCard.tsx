@@ -1,11 +1,46 @@
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
 import type { ControlRecommendation } from "@/lib/types"
 
-const PRIORITY_CLASSES: Record<string, string> = {
-  "Quick win": "bg-green-900/40 text-green-300 border-green-800",
-  Standard: "bg-blue-900/40 text-blue-300 border-blue-800",
-  Strategic: "bg-purple-900/40 text-purple-300 border-purple-800",
+function PriorityBadge({ priority }: { priority: string }) {
+  if (priority === "Quick win") {
+    return (
+      <span
+        className="uppercase font-medium shrink-0"
+        style={{
+          fontSize: "var(--text-xs)",
+          letterSpacing: "var(--tracking-wide)",
+          color: "var(--severity-low)",
+        }}
+      >
+        {priority}
+      </span>
+    )
+  }
+  if (priority === "Strategic") {
+    return (
+      <span
+        className="uppercase font-medium shrink-0 px-2 py-0.5 rounded"
+        style={{
+          fontSize: "var(--text-xs)",
+          letterSpacing: "var(--tracking-wide)",
+          color: "var(--accent)",
+          background: "var(--accent-muted)",
+        }}
+      >
+        {priority}
+      </span>
+    )
+  }
+  return (
+    <span
+      className="uppercase font-medium shrink-0 text-text-secondary"
+      style={{
+        fontSize: "var(--text-xs)",
+        letterSpacing: "var(--tracking-wide)",
+      }}
+    >
+      {priority}
+    </span>
+  )
 }
 
 interface Props {
@@ -14,41 +49,67 @@ interface Props {
 
 export default function ControlCard({ control }: Props) {
   return (
-    <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-4 space-y-3">
-      <div className="flex flex-wrap items-start gap-2">
-        <Badge className="bg-slate-700 text-slate-300 border-slate-600 font-mono text-xs shrink-0">
-          {control.control_id}
-        </Badge>
-        <Badge className="bg-slate-800 text-slate-400 border-slate-700 text-xs shrink-0">
-          {control.framework}
-        </Badge>
-        <Badge
-          className={cn(
-            "text-xs shrink-0",
-            PRIORITY_CLASSES[control.priority] ?? PRIORITY_CLASSES["Standard"]
-          )}
-        >
-          {control.priority}
-        </Badge>
+    <div className="rounded-lg bg-surface-raised p-4 space-y-3">
+      {/* Top row: IDs on left, priority badge on right */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span
+            className="text-text-tertiary"
+            style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)" }}
+          >
+            {control.control_id}
+          </span>
+          <span
+            className="text-text-tertiary px-1.5 py-0.5 rounded"
+            style={{
+              border: "0.5px solid var(--border-subtle)",
+              fontSize: "var(--text-xs)",
+            }}
+          >
+            {control.framework}
+          </span>
+        </div>
+        <PriorityBadge priority={control.priority} />
       </div>
 
-      <p className="font-medium text-slate-100 text-sm">{control.name}</p>
+      {/* Control name */}
+      <p
+        className="text-text-primary font-medium"
+        style={{ fontSize: "var(--text-base)" }}
+      >
+        {control.name}
+      </p>
 
+      {/* Implementation notes */}
       {control.implementation_notes && (
-        <p className="text-sm text-slate-400 leading-relaxed">
+        <p
+          className="text-text-secondary"
+          style={{ fontSize: "var(--text-sm)", lineHeight: 1.6 }}
+        >
           {control.implementation_notes}
         </p>
       )}
 
+      {/* Addresses threats */}
       {control.addresses_threats.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+          <p
+            className="text-text-tertiary uppercase font-medium mb-1"
+            style={{
+              fontSize: "var(--text-xs)",
+              letterSpacing: "var(--tracking-wide)",
+            }}
+          >
             Addresses threats
           </p>
           <ul className="space-y-0.5">
             {control.addresses_threats.map((t, i) => (
-              <li key={i} className="text-xs text-slate-400 flex gap-1">
-                <span className="text-slate-600">-</span>
+              <li
+                key={i}
+                className="text-text-secondary flex gap-1.5"
+                style={{ fontSize: "var(--text-xs)" }}
+              >
+                <span className="text-text-tertiary shrink-0">-</span>
                 <span>{t}</span>
               </li>
             ))}
@@ -56,27 +117,30 @@ export default function ControlCard({ control }: Props) {
         </div>
       )}
 
+      {/* Addresses techniques */}
       {control.addresses_techniques.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+          <p
+            className="text-text-tertiary uppercase font-medium mb-1"
+            style={{
+              fontSize: "var(--text-xs)",
+              letterSpacing: "var(--tracking-wide)",
+            }}
+          >
             Addresses techniques
           </p>
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-2">
             {control.addresses_techniques.map((id) => (
-              <a
+              <span
                 key={id}
-                href={
-                  id.includes(".")
-                    ? `https://attack.mitre.org/techniques/${id.split(".")[0]}/${id.split(".")[1]}/`
-                    : `https://attack.mitre.org/techniques/${id}/`
-                }
-                target="_blank"
-                rel="noopener noreferrer"
+                className="text-text-secondary"
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "var(--text-xs)",
+                }}
               >
-                <Badge className="bg-slate-700 text-slate-400 border-slate-600 hover:bg-slate-600 text-xs cursor-pointer">
-                  {id}
-                </Badge>
-              </a>
+                {id}
+              </span>
             ))}
           </div>
         </div>

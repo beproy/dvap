@@ -4,6 +4,7 @@ import { getSystemServer } from "@/lib/api.server"
 import { ApiError } from "@/lib/errors"
 import SystemTabs from "@/components/systems/SystemTabs"
 import SystemLoadError from "@/components/systems/SystemLoadError"
+import TabContentFade from "@/components/layout/TabContentFade"
 import type { SystemOut } from "@/lib/types"
 
 export default async function SystemLayout({
@@ -19,33 +20,36 @@ export default async function SystemLayout({
   try {
     system = await getSystemServer(params.id)
   } catch (err) {
-    // 404 means the system ID is invalid - show the not-found page.
-    // Any other error (5xx, network failure) renders an inline error card
-    // so the user can retry without a raw crash page.
     if (err instanceof ApiError && err.status === 404) notFound()
     fetchError = err instanceof Error ? err.message : "Failed to load system"
   }
 
   if (!system && !fetchError) notFound()
-
-  if (fetchError) {
-    return <SystemLoadError message={fetchError} />
-  }
-
-  // At this point system is guaranteed non-null: error path returned above,
-  // null+no-error path called notFound() above.
+  if (fetchError) return <SystemLoadError message={fetchError} />
   if (!system) notFound()
 
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-100">{system.name}</h1>
+        <h1
+          className="text-text-primary font-medium"
+          style={{ fontSize: "var(--text-xl)" }}
+        >
+          {system.name}
+        </h1>
         {system.description && (
-          <p className="text-slate-400 text-sm mt-1 max-w-2xl">{system.description}</p>
+          <p
+            className="text-text-secondary mt-1 max-w-2xl"
+            style={{ fontSize: "var(--text-sm)" }}
+          >
+            {system.description}
+          </p>
         )}
       </div>
       <SystemTabs systemId={params.id} />
-      <div className="mt-6">{children}</div>
+      <div className="mt-6">
+        <TabContentFade>{children}</TabContentFade>
+      </div>
     </div>
   )
 }

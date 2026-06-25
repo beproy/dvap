@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge"
 import type { TechniqueMapping } from "@/lib/types"
 
 function mitreUrl(id: string): string {
@@ -18,7 +17,10 @@ interface Props {
 export default function TechniqueMappingTable({ mappings }: Props) {
   if (mappings.length === 0) {
     return (
-      <p className="text-sm text-slate-500 py-4 text-center">
+      <p
+        className="text-text-tertiary py-4 text-center"
+        style={{ fontSize: "var(--text-sm)" }}
+      >
         No technique mappings available.
       </p>
     )
@@ -26,16 +28,36 @@ export default function TechniqueMappingTable({ mappings }: Props) {
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm border-collapse">
+      <table className="w-full border-collapse">
         <thead>
-          <tr className="border-b border-slate-800">
-            <th className="text-left py-2 pr-4 text-xs font-semibold text-slate-400 uppercase tracking-wide w-1/4">
+          <tr style={{ borderBottom: "0.5px solid var(--border-subtle)" }}>
+            <th
+              className="text-left py-2 pr-4 text-text-tertiary uppercase font-medium"
+              style={{
+                fontSize: "var(--text-xs)",
+                letterSpacing: "var(--tracking-wide)",
+                width: "25%",
+              }}
+            >
               Threat
             </th>
-            <th className="text-left py-2 pr-4 text-xs font-semibold text-slate-400 uppercase tracking-wide w-1/4">
+            <th
+              className="text-left py-2 pr-4 text-text-tertiary uppercase font-medium"
+              style={{
+                fontSize: "var(--text-xs)",
+                letterSpacing: "var(--tracking-wide)",
+                width: "20%",
+              }}
+            >
               ATT&amp;CK Techniques
             </th>
-            <th className="text-left py-2 text-xs font-semibold text-slate-400 uppercase tracking-wide">
+            <th
+              className="text-left py-2 text-text-tertiary uppercase font-medium"
+              style={{
+                fontSize: "var(--text-xs)",
+                letterSpacing: "var(--tracking-wide)",
+              }}
+            >
               Rationale
             </th>
           </tr>
@@ -44,28 +66,39 @@ export default function TechniqueMappingTable({ mappings }: Props) {
           {mappings.map((m, i) => (
             <tr
               key={i}
-              className="border-b border-slate-800/60 last:border-0 align-top"
+              className="align-top last:border-0 hover:bg-surface-elevated transition-colors"
+              style={{ borderBottom: "0.5px solid var(--border-subtle)" }}
             >
-              <td className="py-3 pr-4 text-slate-300 text-xs leading-relaxed">
+              <td
+                className="py-3 pr-4 text-text-secondary leading-relaxed"
+                style={{ fontSize: "var(--text-sm)" }}
+              >
                 {m.threat_title}
               </td>
               <td className="py-3 pr-4">
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-2">
                   {m.technique_ids.map((id) => (
                     <a
                       key={id}
                       href={mitreUrl(id)}
                       target="_blank"
                       rel="noopener noreferrer"
+                      className="hover:underline"
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: "var(--text-xs)",
+                        color: "var(--accent)",
+                      }}
                     >
-                      <Badge className="bg-blue-900/40 text-blue-300 border-blue-800 hover:bg-blue-800/60 cursor-pointer text-xs">
-                        {id}
-                      </Badge>
+                      {id}
                     </a>
                   ))}
                 </div>
               </td>
-              <td className="py-3 text-slate-400 text-xs leading-relaxed">
+              <td
+                className="py-3 text-text-secondary leading-relaxed"
+                style={{ fontSize: "var(--text-sm)" }}
+              >
                 {m.rationale}
               </td>
             </tr>

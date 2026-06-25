@@ -41,7 +41,7 @@ function FlowEdge({
       <BaseEdge
         id={id}
         path={edgePath}
-        style={{ stroke: "#475569", strokeWidth: 1.5 }}
+        style={{ stroke: "var(--border-default)", strokeWidth: 1 }}
       />
       {protocol && (
         <EdgeLabelRenderer>
@@ -53,8 +53,22 @@ function FlowEdge({
             }}
             className="nodrag nopan"
           >
-            <div className="flex items-center gap-1 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-slate-400">
-              {isEncrypted && <Lock className="h-2.5 w-2.5 text-green-400 shrink-0" />}
+            <div
+              className="flex items-center gap-1 rounded px-1.5 py-0.5"
+              style={{
+                background:  "var(--surface-raised)",
+                border:      "0.5px solid var(--border-subtle)",
+                fontFamily:  "var(--font-mono)",
+                fontSize:    "var(--text-xs)",
+                color:       "var(--text-tertiary)",
+              }}
+            >
+              {isEncrypted && (
+                <Lock
+                  className="h-2.5 w-2.5 shrink-0"
+                  style={{ color: "var(--text-secondary)" }}
+                />
+              )}
               <span>{protocol}</span>
             </div>
           </div>

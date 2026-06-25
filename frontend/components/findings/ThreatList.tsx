@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import type { Threat } from "@/lib/types"
 import ThreatCard from "./ThreatCard"
@@ -39,73 +38,81 @@ export default function ThreatList({ threats }: Props) {
   const sortedGroupKeys = Object.keys(groups).sort()
 
   const FILTERS: { value: FilterValue; label: string }[] = [
-    { value: "all", label: "All" },
-    { value: "stride", label: "STRIDE" },
+    { value: "all",     label: "All" },
+    { value: "stride",  label: "STRIDE" },
     { value: "maestro", label: "MAESTRO" },
   ]
 
   const GROUPS: { value: GroupValue; label: string }[] = [
     { value: "component", label: "By Component" },
-    { value: "category", label: "By Category" },
+    { value: "category",  label: "By Category" },
   ]
 
   return (
     <div className="space-y-4">
+      {/* Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <span className="text-sm text-slate-500">
+        <span className="text-text-tertiary" style={{ fontSize: "var(--text-sm)" }}>
           {filtered.length} {filtered.length === 1 ? "threat" : "threats"}
         </span>
         <div className="flex flex-wrap gap-2">
           <div className="flex gap-1">
             {FILTERS.map(({ value, label }) => (
-              <Button
+              <button
                 key={value}
-                variant="outline"
-                size="sm"
                 onClick={() => setFilter(value)}
                 className={cn(
-                  "h-7 border-slate-700 text-xs",
+                  "px-2.5 py-1 rounded border transition-colors",
                   filter === value
-                    ? "bg-slate-700 text-slate-100"
-                    : "text-slate-400 hover:bg-slate-800"
+                    ? "bg-surface-elevated border-border-default text-text-primary"
+                    : "border-border-subtle text-text-tertiary hover:text-text-primary hover:border-border-default"
                 )}
+                style={{ fontSize: "var(--text-xs)" }}
               >
                 {label}
-              </Button>
+              </button>
             ))}
           </div>
           <div className="flex gap-1">
             {GROUPS.map(({ value, label }) => (
-              <Button
+              <button
                 key={value}
-                variant="outline"
-                size="sm"
                 onClick={() => setGroup(value)}
                 className={cn(
-                  "h-7 border-slate-700 text-xs",
+                  "px-2.5 py-1 rounded border transition-colors",
                   group === value
-                    ? "bg-slate-700 text-slate-100"
-                    : "text-slate-400 hover:bg-slate-800"
+                    ? "bg-surface-elevated border-border-default text-text-primary"
+                    : "border-border-subtle text-text-tertiary hover:text-text-primary hover:border-border-default"
                 )}
+                style={{ fontSize: "var(--text-xs)" }}
               >
                 {label}
-              </Button>
+              </button>
             ))}
           </div>
         </div>
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-sm text-slate-500 py-4 text-center">
+        <p
+          className="text-text-tertiary py-4 text-center"
+          style={{ fontSize: "var(--text-sm)" }}
+        >
           No threats match the current filter.
         </p>
       ) : (
         <div className="space-y-6">
           {sortedGroupKeys.map((groupKey) => (
             <div key={groupKey}>
-              <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+              <h4
+                className="text-text-tertiary uppercase font-medium mb-2"
+                style={{
+                  fontSize: "var(--text-xs)",
+                  letterSpacing: "var(--tracking-wider)",
+                }}
+              >
                 {groupKey}
-                <span className="ml-2 text-slate-600 font-normal normal-case">
+                <span className="ml-2 font-normal normal-case">
                   ({groups[groupKey].length})
                 </span>
               </h4>

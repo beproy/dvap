@@ -14,7 +14,10 @@ interface Props {
 export default function ControlsList({ controls }: Props) {
   if (controls.length === 0) {
     return (
-      <p className="text-sm text-slate-500 py-4 text-center">
+      <p
+        className="text-text-tertiary py-4 text-center"
+        style={{ fontSize: "var(--text-sm)" }}
+      >
         No control recommendations available.
       </p>
     )
@@ -27,9 +30,15 @@ export default function ControlsList({ controls }: Props) {
         if (group.length === 0) return null
         return (
           <div key={priority}>
-            <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+            <h4
+              className="text-text-tertiary uppercase font-medium mb-3"
+              style={{
+                fontSize: "var(--text-xs)",
+                letterSpacing: "var(--tracking-wider)",
+              }}
+            >
               {priority}
-              <span className="ml-2 text-slate-600 font-normal normal-case">
+              <span className="ml-2 font-normal normal-case">
                 ({group.length})
               </span>
             </h4>

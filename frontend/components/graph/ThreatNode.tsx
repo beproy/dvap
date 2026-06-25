@@ -10,15 +10,15 @@ type ThreatNodeData = {
   likelihood?: string
 }
 
-const IMPACT_STYLES: Record<string, { border: string; badge: string }> = {
-  High: { border: "border-red-500", badge: "bg-red-900/50 text-red-300" },
-  Medium: { border: "border-orange-500", badge: "bg-orange-900/50 text-orange-300" },
-  Low: { border: "border-yellow-500", badge: "bg-yellow-900/50 text-yellow-300" },
+const IMPACT_COLORS: Record<string, string> = {
+  High:   "var(--severity-critical)",
+  Medium: "var(--severity-high)",
+  Low:    "var(--severity-low)",
 }
 
 function ThreatNode({ data }: NodeProps<ThreatNodeData>) {
   const impact = data.impact ?? "Medium"
-  const styles = IMPACT_STYLES[impact] ?? IMPACT_STYLES["Medium"]
+  const severityColor = IMPACT_COLORS[impact] ?? IMPACT_COLORS["Medium"]
 
   const label =
     data.label.length > 55 ? data.label.slice(0, 52) + "..." : data.label
@@ -28,29 +28,38 @@ function ThreatNode({ data }: NodeProps<ThreatNodeData>) {
       <Handle
         type="target"
         position={Position.Left}
-        className="!border-slate-600 !bg-slate-700 !w-2 !h-2"
+        className="!border-border-default !bg-surface-elevated !w-2 !h-2"
       />
       <div
-        className={`rounded-lg border-2 ${styles.border} bg-slate-900 px-3 py-2 min-w-[140px] max-w-[180px] shadow-lg`}
+        className="rounded-lg bg-surface-raised px-3 py-2.5 min-w-[140px] max-w-[180px]"
+        style={{
+          borderTop:    "0.5px solid var(--border-subtle)",
+          borderRight:  "0.5px solid var(--border-subtle)",
+          borderBottom: "0.5px solid var(--border-subtle)",
+          borderLeft:   `2px solid ${severityColor}`,
+        }}
       >
-        <p className="text-slate-100 text-xs font-medium leading-tight mb-1.5">
+        <p
+          className="text-text-primary font-medium leading-tight mb-1.5"
+          style={{ fontSize: "var(--text-sm)" }}
+        >
           {label}
         </p>
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {data.category && (
-            <span className="text-xs text-slate-500">{data.category}</span>
-          )}
-          {impact && (
-            <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${styles.badge}`}>
-              {impact}
-            </span>
-          )}
-        </div>
+        <span
+          className="uppercase font-medium"
+          style={{
+            fontSize: "var(--text-xs)",
+            letterSpacing: "var(--tracking-wide)",
+            color: severityColor,
+          }}
+        >
+          {impact}
+        </span>
       </div>
       <Handle
         type="source"
         position={Position.Right}
-        className="!border-slate-600 !bg-slate-700 !w-2 !h-2"
+        className="!border-border-default !bg-surface-elevated !w-2 !h-2"
       />
     </>
   )

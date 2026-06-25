@@ -2,8 +2,7 @@
 
 import { useEffect } from "react"
 import Link from "next/link"
-import { AlertCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { AlertTriangle } from "lucide-react"
 
 export default function AppError({
   error,
@@ -17,28 +16,65 @@ export default function AppError({
   }, [error])
 
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
-      <AlertCircle className="h-10 w-10 text-red-400" />
-      <div>
-        <p className="text-slate-100 text-lg font-semibold">Something went wrong</p>
-        <p className="text-slate-400 text-sm mt-1">
-          We couldn't load this system. The backend service may be unavailable.
-        </p>
-      </div>
-      {error.message && (
-        <pre className="mt-1 max-w-md rounded bg-slate-900 border border-slate-800 px-3 py-2 text-xs text-slate-500 text-left overflow-auto">
-          {error.message}
-        </pre>
-      )}
-      <div className="flex gap-3 mt-2">
-        <Button onClick={reset}>Try again</Button>
-        <Button
-          variant="outline"
-          asChild
-          className="border-slate-700 text-slate-300 hover:bg-slate-800"
-        >
-          <Link href="/">Back to systems</Link>
-        </Button>
+    <div className="flex items-center justify-center py-20">
+      <div
+        className="rounded-lg bg-surface-raised p-6 max-w-md w-full space-y-4"
+        style={{
+          borderTop:    "0.5px solid var(--border-subtle)",
+          borderRight:  "0.5px solid var(--border-subtle)",
+          borderBottom: "0.5px solid var(--border-subtle)",
+          borderLeft:   "2px solid var(--severity-critical)",
+        }}
+      >
+        <AlertTriangle
+          className="h-5 w-5"
+          style={{ color: "var(--severity-critical)" }}
+        />
+        <div>
+          <p
+            className="text-text-primary font-medium"
+            style={{ fontSize: "var(--text-base)" }}
+          >
+            Something went wrong
+          </p>
+          <p
+            className="text-text-secondary mt-1"
+            style={{ fontSize: "var(--text-sm)" }}
+          >
+            The backend service may be unavailable. Check that all containers
+            are running.
+          </p>
+        </div>
+        {error.message && (
+          <pre
+            className="text-text-tertiary overflow-auto rounded"
+            style={{
+              fontSize:        "var(--text-xs)",
+              fontFamily:      "var(--font-mono)",
+              background:      "var(--surface-base)",
+              padding:         "var(--space-3)",
+              lineHeight:      1.5,
+            }}
+          >
+            {error.message}
+          </pre>
+        )}
+        <div className="flex gap-2">
+          <button
+            onClick={reset}
+            className="px-3 py-1.5 rounded-lg border border-border-default text-text-primary hover:bg-surface-elevated transition-colors"
+            style={{ fontSize: "var(--text-sm)" }}
+          >
+            Try again
+          </button>
+          <Link
+            href="/"
+            className="px-3 py-1.5 rounded-lg border border-border-subtle text-text-secondary hover:border-border-default hover:text-text-primary transition-colors"
+            style={{ fontSize: "var(--text-sm)" }}
+          >
+            Back to systems
+          </Link>
+        </div>
       </div>
     </div>
   )

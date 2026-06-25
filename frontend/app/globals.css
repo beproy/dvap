@@ -1,3 +1,4 @@
+@import "./design-tokens.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -16,7 +17,6 @@
     --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
@@ -39,7 +39,6 @@
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
@@ -55,5 +54,58 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Direction C: inputs use accent color on focus instead of shadcn ring */
+input:focus-visible,
+textarea:focus-visible {
+  box-shadow: none !important;
+  border-color: var(--accent) !important;
+  outline: none;
+}
+
+/* Skeleton shimmer */
+@keyframes skeleton-shimmer {
+  0%, 100% { background-color: var(--surface-raised); }
+  50%       { background-color: var(--surface-elevated); }
+}
+.skeleton-shimmer {
+  animation: skeleton-shimmer 1.5s linear infinite;
+}
+
+/* Motion 1: status badge flash to cyan when run completes */
+@keyframes status-complete-flash {
+  0%   { box-shadow: 0 0 0 0   rgba(77, 208, 225, 0); }
+  35%  { box-shadow: 0 0 0 6px rgba(77, 208, 225, 0.40); }
+  100% { box-shadow: 0 0 0 10px rgba(77, 208, 225, 0); }
+}
+.status-complete-flash {
+  animation: status-complete-flash var(--duration-normal) var(--easing-emphasis) forwards;
+}
+
+/* Motion 2: step card lift when revealed in story mode */
+@keyframes step-reveal {
+  from { transform: translateY(-4px); }
+  to   { transform: translateY(0); }
+}
+.step-just-revealed {
+  animation: step-reveal var(--duration-normal) var(--easing-emphasis) forwards;
+}
+
+/* Motion 4: tab content fade-in on route change */
+@keyframes tab-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.tab-fade-in {
+  animation: tab-fade-in var(--duration-fast) var(--easing-default) forwards;
+}
+
+/* Honour OS-level reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration:  0.01ms !important;
   }
 }

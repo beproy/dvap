@@ -1,26 +1,36 @@
 "use client"
 
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
+import { useEffect, useRef } from "react"
 import type { RunStatus } from "@/lib/types"
 
-const STATUS_CONFIG: Record<RunStatus, { label: string; className: string }> = {
+const STATUS_STYLES: Record<
+  RunStatus,
+  { label: string; color: string; bg: string; border: string; pulse?: boolean }
+> = {
   pending: {
-    label: "Pending",
-    className: "bg-slate-700 text-slate-300 border-slate-600",
+    label:  "Pending",
+    color:  "var(--status-pending)",
+    bg:     "transparent",
+    border: "var(--border-default)",
   },
   running: {
-    label: "Running",
-    className:
-      "bg-blue-900/60 text-blue-300 border-blue-700 animate-pulse",
+    label:  "Running",
+    color:  "var(--status-running)",
+    bg:     "rgba(77, 208, 225, 0.08)",
+    border: "rgba(77, 208, 225, 0.25)",
+    pulse:  true,
   },
   completed: {
-    label: "Completed",
-    className: "bg-green-900/60 text-green-300 border-green-700",
+    label:  "Completed",
+    color:  "var(--status-completed)",
+    bg:     "rgba(109, 203, 131, 0.08)",
+    border: "rgba(109, 203, 131, 0.25)",
   },
   failed: {
-    label: "Failed",
-    className: "bg-red-900/60 text-red-300 border-red-700",
+    label:  "Failed",
+    color:  "var(--status-failed)",
+    bg:     "rgba(232, 137, 107, 0.08)",
+    border: "rgba(232, 137, 107, 0.25)",
   },
 }
 
@@ -29,9 +39,43 @@ interface Props {
   className?: string
 }
 
-export default function RunStatusBadge({ status, className }: Props) {
-  const config = STATUS_CONFIG[status]
+export default function RunStatusBadge({ status, className = "" }: Props) {
+  const cfg = STATUS_STYLES[status]
+  const spanRef = useRef<HTMLSpanElement>(null)
+  const prevStatusRef = useRef<RunStatus>(status)
+
+  useEffect(() => {
+    if (prevStatusRef.current !== "completed" && status === "completed") {
+      const el = spanRef.current
+      if (el) {
+        el.classList.remove("status-complete-flash")
+        void el.offsetWidth // force reflow so animation restarts
+        el.classList.add("status-complete-flash")
+      }
+    }
+    prevStatusRef.current = status
+  }, [status])
+
   return (
-    <Badge className={cn(config.className, className)}>{config.label}</Badge>
+    <span
+      ref={spanRef}
+      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded uppercase font-medium ${className}`}
+      style={{
+        fontSize:        "var(--text-xs)",
+        letterSpacing:   "var(--tracking-wide)",
+        color:           cfg.color,
+        background:      cfg.bg,
+        border:          `0.5px solid ${cfg.border}`,
+      }}
+    >
+      {cfg.pulse && (
+        <span
+          className="rounded-full shrink-0 animate-pulse"
+          style={{ width: 5, height: 5, background: cfg.color }}
+          aria-hidden="true"
+        />
+      )}
+      {cfg.label}
+    </span>
   )
 }

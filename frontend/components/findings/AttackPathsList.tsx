@@ -8,7 +8,10 @@ interface Props {
 export default function AttackPathsList({ paths }: Props) {
   if (paths.length === 0) {
     return (
-      <p className="text-sm text-slate-500 py-4 text-center">
+      <p
+        className="text-text-tertiary py-4 text-center"
+        style={{ fontSize: "var(--text-sm)" }}
+      >
         No attack paths identified.
       </p>
     )

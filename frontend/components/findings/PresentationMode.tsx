@@ -24,8 +24,6 @@ export default function PresentationMode({ path, onClose }: Props) {
     setCurrentStep((s) => Math.max(s - 1, 0))
   }, [])
 
-  // Keyboard controls: Space/ArrowRight advance, ArrowLeft goes back, Esc closes.
-  // Any key interaction pauses auto-advance for the session.
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") {
@@ -46,7 +44,6 @@ export default function PresentationMode({ path, onClose }: Props) {
     return () => window.removeEventListener("keydown", onKeyDown)
   }, [onClose, goNext, goPrev])
 
-  // Auto-advance every 4 seconds; cancelled permanently on first keyboard interaction.
   useEffect(() => {
     if (autoAdvancePaused || currentStep >= total - 1) return
     const timer = setTimeout(() => setCurrentStep((s) => s + 1), 4000)
@@ -64,14 +61,15 @@ export default function PresentationMode({ path, onClose }: Props) {
       role="dialog"
       aria-modal="true"
       aria-label={`Presentation: ${path.name}`}
-      className="fixed inset-0 z-50 bg-slate-950 flex flex-col select-none"
+      className="fixed inset-0 z-50 bg-surface-base flex flex-col select-none"
     >
       {/* Top progress bar */}
-      <div className="h-0.5 bg-slate-800 shrink-0">
+      <div className="h-0.5 bg-surface-raised shrink-0">
         <div
-          className="h-full bg-cyan-500"
           style={{
             width: `${progressPct}%`,
+            height: "100%",
+            background: "var(--accent)",
             transition: "width 300ms cubic-bezier(0.4, 0, 0.2, 1)",
           }}
         />
@@ -79,12 +77,15 @@ export default function PresentationMode({ path, onClose }: Props) {
 
       {/* Path name label and close button */}
       <div className="shrink-0 flex items-center justify-between px-6 pt-5 pb-2">
-        <p className="text-xs text-slate-600 uppercase tracking-widest truncate max-w-[80%]">
+        <p
+          className="text-text-tertiary uppercase tracking-widest truncate max-w-[80%]"
+          style={{ fontSize: "var(--text-xs)" }}
+        >
           {path.name}
         </p>
         <button
           onClick={onClose}
-          className="p-1.5 rounded-lg text-slate-600 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+          className="p-1.5 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-surface-elevated transition-colors"
           aria-label="Close presentation (Esc)"
         >
           <X className="w-4 h-4" />
@@ -93,22 +94,35 @@ export default function PresentationMode({ path, onClose }: Props) {
 
       {/* Main content -- vertically centered */}
       <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
-        <p className="text-xs text-slate-500 uppercase tracking-widest mb-8">
+        <p
+          className="text-text-tertiary uppercase tracking-widest mb-8"
+          style={{ fontSize: "var(--text-xs)" }}
+        >
           Step {currentStep + 1} of {total}
         </p>
 
         <p
-          className="text-4xl text-cyan-400 mb-6"
-          style={{ fontFamily: "ui-monospace, monospace" }}
+          className="mb-6"
+          style={{
+            fontSize: "var(--text-2xl)",
+            fontFamily: "var(--font-mono)",
+            color: "var(--accent)",
+          }}
         >
           {step.technique_id}
         </p>
 
-        <p className="text-xl font-semibold text-slate-100 max-w-2xl leading-snug">
+        <p
+          className="text-text-primary font-medium max-w-2xl leading-snug"
+          style={{ fontSize: "var(--text-lg)" }}
+        >
           {step.description}
         </p>
 
-        <p className="text-xs text-slate-700 mt-12">
+        <p
+          className="text-text-disabled mt-12"
+          style={{ fontSize: "var(--text-xs)" }}
+        >
           Space / Arrow keys to navigate &nbsp;&middot;&nbsp; Esc to close
         </p>
       </div>
@@ -127,11 +141,11 @@ export default function PresentationMode({ path, onClose }: Props) {
             style={{
               backgroundColor:
                 i === currentStep
-                  ? "rgb(34 211 238)"
+                  ? "var(--accent)"
                   : i < currentStep
-                  ? "rgb(71 85 105)"
-                  : "rgb(30 41 59)",
-              transition: "background-color 250ms cubic-bezier(0.4, 0, 0.2, 1)",
+                  ? "var(--border-default)"
+                  : "var(--border-subtle)",
+              transition: `background-color var(--duration-normal) var(--easing-default)`,
             }}
           />
         ))}
