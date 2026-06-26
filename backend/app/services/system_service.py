@@ -1,4 +1,5 @@
 import asyncio
+import json
 import secrets
 from datetime import datetime, timezone
 
@@ -38,12 +39,74 @@ def _sqlite_delete_system(system_id: str) -> None:
 
 
 def _sqlite_list_systems() -> list[dict]:
+    """Fetch all systems with threat_count and max_severity from each system's
+    most recent completed analysis run. Uses two queries to avoid N+1."""
     with db_conn() as conn:
-        rows = conn.execute(
+        system_rows = conn.execute(
             "SELECT system_id, name, description, component_count, created_at "
             "FROM systems ORDER BY created_at DESC"
         ).fetchall()
-        return [dict(r) for r in rows]
+
+        if not system_rows:
+            return []
+
+        # One query: agent outputs for the most recent completed run per system
+        agent_rows = conn.execute(
+            "SELECT ar.system_id, ao.agent_name, ao.output_json "
+            "FROM agent_outputs ao "
+            "JOIN analysis_runs ar ON ao.run_id = ar.run_id "
+            "JOIN ("
+            "  SELECT system_id, MAX(completed_at) AS max_completed "
+            "  FROM analysis_runs WHERE status = 'completed' "
+            "  GROUP BY system_id"
+            ") latest "
+            "ON ar.system_id = latest.system_id "
+            "AND ar.completed_at = latest.max_completed "
+            "WHERE ar.status = 'completed'"
+        ).fetchall()
+
+        # Group agent outputs by system_id
+        by_system: dict[str, dict[str, dict]] = {}
+        for row in agent_rows:
+            sid = row["system_id"]
+            if sid not in by_system:
+                by_system[sid] = {}
+            by_system[sid][row["agent_name"]] = json.loads(row["output_json"])
+
+        severity_order = ["Critical", "High", "Medium", "Low"]
+        results = []
+        for row in system_rows:
+            sid = row["system_id"]
+            outputs = by_system.get(sid, {})
+
+            threat_count = 0
+            if "stride" in outputs:
+                threat_count += len(outputs["stride"].get("threats", []))
+            if "maestro" in outputs:
+                if outputs["maestro"].get("is_ai_system", False):
+                    threat_count += len(outputs["maestro"].get("threats", []))
+
+            paths = outputs.get("attack_tree", {}).get("paths", [])
+            total_paths = len(paths)
+            critical_count = sum(1 for p in paths if p.get("severity") == "Critical")
+            # Badge Critical only when 2+ paths OR Critical > 25% of total paths.
+            # A single Critical path in an otherwise High/Medium system over-signals.
+            max_severity: str | None = None
+            if critical_count >= 2 or (total_paths > 0 and critical_count / total_paths > 0.25):
+                max_severity = "Critical"
+            else:
+                for sev in severity_order[1:]:  # skip Critical, already handled
+                    if any(p.get("severity") == sev for p in paths):
+                        max_severity = sev
+                        break
+
+            results.append({
+                **dict(row),
+                "threat_count": threat_count,
+                "max_severity": max_severity,
+            })
+
+        return results
 
 
 # ── Neo4j transaction functions ───────────────────────────────────────────────
@@ -221,6 +284,8 @@ async def list_systems() -> list[SystemSummary]:
             description=r.get("description"),
             component_count=r["component_count"],
             created_at=r["created_at"],
+            threat_count=r.get("threat_count", 0),
+            max_severity=r.get("max_severity"),
         )
         for r in rows
     ]

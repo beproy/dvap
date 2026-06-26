@@ -200,6 +200,14 @@ class SystemSummary(BaseModel):
     description: str | None
     component_count: int
     created_at: str
+    threat_count: int = Field(
+        default=0,
+        description="Threat count from the most recent completed analysis, or 0 if none",
+    )
+    max_severity: str | None = Field(
+        default=None,
+        description="Highest attack path severity from the most recent completed analysis",
+    )
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -209,6 +217,8 @@ class SystemSummary(BaseModel):
                 "description": "Public-facing customer support portal with auth and ticketing.",
                 "component_count": 4,
                 "created_at": "2026-06-10T14:23:11Z",
+                "threat_count": 12,
+                "max_severity": "High",
             }
         }
     )

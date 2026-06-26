@@ -19,7 +19,7 @@ async def create_system(body: SystemCreate) -> SystemCreateResponse:
 @router.get(
     "/",
     response_model=list[SystemSummary],
-    summary="List all registered systems",
+    summary="List all registered systems with threat counts from the most recent completed analysis",
 )
 async def list_systems() -> list[SystemSummary]:
     return await system_service.list_systems()

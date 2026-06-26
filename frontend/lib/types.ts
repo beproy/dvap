@@ -41,13 +41,15 @@ export interface CreateSystemRequest {
 
 // ── System response types ─────────────────────────────────────────────────────
 
-// Returned by GET /api/systems (list). No components/flows included.
+// Returned by GET /api/systems (list). Includes analysis summary fields.
 export interface SystemSummary {
   system_id: string;
   name: string;
   description: string | null;
   component_count: number;
   created_at: string;
+  threat_count: number;
+  max_severity: "Critical" | "High" | "Medium" | "Low" | null;
 }
 
 // Returned by POST /api/systems (create).

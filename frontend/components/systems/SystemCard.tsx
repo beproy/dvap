@@ -30,6 +30,11 @@ export default function SystemCard({ system }: Props) {
   const truncated =
     description.length > 100 ? description.slice(0, 97) + "..." : description
 
+  const topSeverity =
+    system.max_severity === "Critical" || system.max_severity === "High"
+      ? system.max_severity
+      : null
+
   async function handleDelete() {
     setDeleting(true)
     try {
@@ -51,7 +56,7 @@ export default function SystemCard({ system }: Props) {
         style={{ transitionDuration: "var(--duration-normal)", transitionTimingFunction: "var(--easing-default)" }}
       >
         <div className="p-5 flex flex-col gap-3">
-          {/* Name row with delete button */}
+          {/* Name row with severity badge and delete button */}
           <div className="flex items-start justify-between gap-2">
             <h3
               className="text-text-primary font-medium leading-snug"
@@ -59,17 +64,43 @@ export default function SystemCard({ system }: Props) {
             >
               {system.name}
             </h3>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                setConfirmOpen(true)
-              }}
-              className="shrink-0 opacity-0 group-hover:opacity-100 text-text-tertiary hover:text-severity-critical transition-all p-1 rounded focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-border-strong"
-              style={{ transitionDuration: "var(--duration-normal)" }}
-              aria-label="Delete system"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              {topSeverity === "Critical" && (
+                <span
+                  className="font-medium uppercase"
+                  style={{
+                    fontSize: "var(--text-xs)",
+                    color: "var(--severity-critical)",
+                    letterSpacing: "0.06em",
+                  }}
+                >
+                  CRITICAL
+                </span>
+              )}
+              {topSeverity === "High" && (
+                <span
+                  className="font-medium uppercase"
+                  style={{
+                    fontSize: "var(--text-xs)",
+                    color: "var(--severity-high)",
+                    letterSpacing: "0.06em",
+                  }}
+                >
+                  HIGH
+                </span>
+              )}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setConfirmOpen(true)
+                }}
+                className="opacity-0 group-hover:opacity-100 text-text-tertiary hover:text-severity-critical transition-all p-1 rounded focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-border-strong"
+                style={{ transitionDuration: "var(--duration-normal)" }}
+                aria-label="Delete system"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
 
           {/* Description */}
@@ -92,6 +123,17 @@ export default function SystemCard({ system }: Props) {
             {" "}&middot;{" "}
             created {formatRelativeTime(system.created_at)}
           </p>
+
+          {/* Threat count row -- only shown when an analysis has run */}
+          {system.threat_count > 0 && (
+            <p
+              className="text-text-tertiary"
+              style={{ fontSize: "var(--text-xs)" }}
+            >
+              {system.threat_count}{" "}
+              {system.threat_count === 1 ? "threat" : "threats"}
+            </p>
+          )}
         </div>
       </div>
 
